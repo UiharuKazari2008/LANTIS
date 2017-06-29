@@ -82,6 +82,9 @@ ssh $REMOTE_HOST -l $REMOTE_USER -p $REMOTE_PORT -i $KEY $COMMON_OPT $REMOTE_PFW
 		echo "[$(date)][>>>] Sanitizing End-Point..."
 		netstat -tlpn | grep ":80 " | sed -n 's@.* \([0-9]*\)/ssh.*@kill \1@p' | sh > /dev/null
 	fi
+	if [ $LOCAL_OPEN -eq 1 ]; then
+		echo "[$(date)][<<<] Reverse Conection will be used"
+	fi
 	echo "[$(date)][<<<] Linked! Accepting Incoming Connections..."
 	# SSH back in for port fowarding
 	ssh $LOCAL_IP -l $LOCAL_USER -p $LOCAL_PORT -i $KEY $LOCAL_OPT $COMMON_OPT
