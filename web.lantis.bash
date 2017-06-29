@@ -85,7 +85,7 @@ ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} $
 	#Kill stale SSH port forwarding
 	if [ ${REMOTE_KILL} -eq 1 ]; then
 		echo "[$(date)][>>>] Sanitizing End-Point..."
-		netstat -tlpn | grep ":${LOCAL_WEBPORT} " | sed -n 's@.* \([0-9]*\)/ssh.*@kill \1@p' | sh > /dev/null
+		netstat -tlpn | grep ":${LOCAL_WEBPORT1} " | sed -n 's@.* \([0-9]*\)/ssh.*@kill \1@p' | sh > /dev/null
 	fi
 	if [ ${LOCAL_OPEN} -eq 0 ]; then
 		echo "[$(date)][<<<] Reverse Conection will be used"
