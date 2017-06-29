@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # LANTIS EasyConnect #
 
 ### Local Config - This host
