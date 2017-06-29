@@ -43,8 +43,8 @@ echo "= LANTIS EasyLink 2 - Academy City Research ========="
 
 while [ 0 -eq 0 ]; do
 # Check Internet Connection
-if ! wget -q --spider https://google.com --timeout=15
-then
+wget -q --spider https://google.com --timeout=15
+if [ $? -eq 0 ]; then
 echo "[$(date)][---] Internet Connection Ready"
 
 { 
