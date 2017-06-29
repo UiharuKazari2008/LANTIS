@@ -23,6 +23,14 @@ KEY=lantis.key          # SSH Key to auth with for both directions
 
 USAGE(){
 cat << EOF
+		__    ___    _   _________________
+	   / /   /   |  / | / /_  __/  _/ ___/
+	  / /   / /| | /  |/ / / /  / / \__ \ 
+	 / /___/ ___ |/ /|  / / / _/ / ___/ / 
+	/_____/_/  |_/_/ |_/ /_/ /___//____/  
+	Lain Anonymous NetworkIng System
+	by : Academy City Research
+
 Usage:
 
 	Remote Host ===========================================================
@@ -44,25 +52,20 @@ Usage:
 
 	Extra Options =========================================================
 
-	-K  Key
-		Key to use for both directions (Default: lantis.key + .pub)
+	-K  Key to use for both directions (Default: lantis.key + .pub)
 		
-	-R  Bypass NAT
-		Use Reverse SSH Tunneling to bypass inbound NAT
+	-R  Use Reverse SSH Tunneling to bypass inbound NAT
 		requirements. Useful if you dont have access to
-		the firewall or router. (Not my fault if you get 
-		in trouble...) (Default: Use Direct Connection)
+		the firewall or router. (Default: Use Direct Connection)
 
-	-K  Kill Port Access
-		Kill what ever is using port 1 to make way for 
-		this connection (AKA Hijack the port)
+	-K  Kill what ever is using port 1 to make way for this connection 
+		(AKA Hijack the port)
 
 	-S  Setup Remote Server
-		This will setup the remote host if auth fails
+		This will setup the remote host if auth fails 
 		You ssh key for the current user will be used
 
-	-C  Config File (Not accepted yet)
-		Config File to use
+	-C  Source File to use
 EOF
 }
 
@@ -96,6 +99,16 @@ done
 COMMON_OPT="-C -2 -o BatchMode=yes -o StrictHostKeyChecking=no -o TCPKeepAlive=yes -o ServerAliveInterval=5 -o ConnectTimeout=15 -o LogLevel=Error"
 LOCAL_OPT="-N -o CompressionLevel=9 -o ExitOnForwardFailure=yes -g -L ${REMOTE_WEBPORT1}:${LOCAL_WEBHOST}:${LOCAL_WEBPORT1} -L ${REMOTE_WEBPORT2}:${LOCAL_WEBHOST}:${LOCAL_WEBPORT2}"
 
+cat << EOF
+		__    ___    _   _________________
+	   / /   /   |  / | / /_  __/  _/ ___/
+	  / /   / /| | /  |/ / / /  / / \__ \ 
+	 / /___/ ___ |/ /|  / / / _/ / ___/ / 
+	/_____/_/  |_/_/ |_/ /_/ /___//____/  
+	Lain Anonymous NetworkIng System
+	by : Academy City Research
+
+EOF
 echo "= LANTIS EasyLink 2 - Academy City Research ========="
 
 while [ 0 -eq 0 ]; do
