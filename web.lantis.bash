@@ -23,7 +23,7 @@ KEY=lantis.key          # SSH Key to auth with for both directions
 
 USAGE(){
 cat << EOF
-		__    ___    _   _________________
+        __    ___    _   _________________
 	   / /   /   |  / | / /_  __/  _/ ___/
 	  / /   / /| | /  |/ / / /  / / \__ \ 
 	 / /___/ ___ |/ /|  / / / _/ / ___/ / 
@@ -100,7 +100,7 @@ COMMON_OPT="-C -2 -o BatchMode=yes -o StrictHostKeyChecking=no -o TCPKeepAlive=y
 LOCAL_OPT="-N -o CompressionLevel=9 -o ExitOnForwardFailure=yes -g -L ${REMOTE_WEBPORT1}:${LOCAL_WEBHOST}:${LOCAL_WEBPORT1} -L ${REMOTE_WEBPORT2}:${LOCAL_WEBHOST}:${LOCAL_WEBPORT2}"
 
 cat << EOF
-		__    ___    _   _________________
+        __    ___    _   _________________
 	   / /   /   |  / | / /_  __/  _/ ___/
 	  / /   / /| | /  |/ / / /  / / \__ \ 
 	 / /___/ ___ |/ /|  / / / _/ / ___/ / 
