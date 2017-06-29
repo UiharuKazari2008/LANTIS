@@ -28,8 +28,8 @@ cat << EOF
       / /   / /| | /  |/ / / /  / / \__ \ 
      / /___/ ___ |/ /|  / / / _/ / ___/ / 
     /_____/_/  |_/_/ |_/ /_/ /___//____/  
-	Lain Anonymous NetworkIng System
-	by : Academy City Research
+    Lain Anonymous NetworkIng System
+    by : Academy City Research
 
 Usage:
 
@@ -66,6 +66,7 @@ Usage:
 		You ssh key for the current user will be used
 
 	-C  Source File to use
+	
 EOF
 }
 
@@ -105,8 +106,8 @@ cat << EOF
       / /   / /| | /  |/ / / /  / / \__ \ 
      / /___/ ___ |/ /|  / / / _/ / ___/ / 
     /_____/_/  |_/_/ |_/ /_/ /___//____/  
-	Lain Anonymous NetworkIng System
-	by : Academy City Research
+    Lain Anonymous NetworkIng System
+    by : Academy City Research
 
 EOF
 echo "= LANTIS EasyLink 2 - Academy City Research ========="
