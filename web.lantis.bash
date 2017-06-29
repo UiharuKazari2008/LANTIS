@@ -123,13 +123,13 @@ LOCAL_OPT="-N -o CompressionLevel=9 -o ExitOnForwardFailure=yes -g -L ${REMOTE_W
 ########################################################################################################################
 
 cat << EOF
-        __    ___    _   _________________
-       / /   /   |  / | / /_  __/  _/ ___/
-      / /   / /| | /  |/ / / /  / / \__ \ 
-     / /___/ ___ |/ /|  / / / _/ / ___/ / 
-    /_____/_/  |_/_/ |_/ /_/ /___//____/  
-    Lain Anonymous NetworkIng System
-    by : Academy City Research
+     __    ___    _   _________________
+    / /   /   |  / | / /_  __/  _/ ___/
+   / /   / /| | /  |/ / / /  / / \__ \ 
+  / /___/ ___ |/ /|  / / / _/ / ___/ / 
+ /_____/_/  |_/_/ |_/ /_/ /___//____/  
+ Lain Anonymous NetworkIng System
+ by : Academy City Research
 
 EOF
 echo "= LANTIS EasyLink 2 - Academy City Research ========="
