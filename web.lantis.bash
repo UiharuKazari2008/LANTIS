@@ -5,22 +5,23 @@
 ### Local Config - This host
 LOCAL_USER=root               # User to login as
 LOCAL_PORT=65500              # Local SSH port to connect back into
-LOCAL_WEBHOST=127.0.0.1       # Server to rouute web traffic to
-LOCAL_OPEN=1                  # Is your local site ports open? Bypass NAT otherwise
+LOCAL_WEBHOST=127.0.0.1       # Server Host to rouute web traffic to
+LOCAL_WEBPORT=80              # Server Port
+LOCAL_OPEN=0                  # Is your local site ports open? Bypass NAT otherwise
 
 ### Remote Config - End Point for presentation
 REMOTE_HOST=104.236.243.143   # Server to use
 REMOTE_USER=root              # User to login as
 REMOTE_PORT=22                # SSH port of Remote Server
 REMOTE_KILL80=1               # Kill what ever is using port 80
-REMOTE_SETUP=0                # Setup Remote Host
+REMOTE_SETUP=1                # Setup Remote Host
 
 #Keys - Common key shared between hosts
 KEY=/root/lantis.key          # SSH Key to auth with for both directions
 
 #SSH Options - Options used for connection
 COMMON_OPT="-C -2 -o BatchMode=yes -o StrictHostKeyChecking=no -o TCPKeepAlive=yes -o ServerAliveInterval=5 -o ConnectTimeout=15 -o LogLevel=Error"
-LOCAL_OPT="-N -o CompressionLevel=9 -o ExitOnForwardFailure=yes -g -L 80:${LOCAL_WEBHOST}:80 -L 443:${LOCAL_WEBHOST}:443"
+LOCAL_OPT="-N -o CompressionLevel=9 -o ExitOnForwardFailure=yes -g -L ${LOCAL_WEBPORT}:${LOCAL_WEBHOST}:${LOCAL_WEBPORT} -L 443:${LOCAL_WEBHOST}:443"
 
 
 
@@ -42,57 +43,54 @@ echo "= LANTIS EasyLink 2 - Academy City Research ========="
 
 while [ 0 -eq 0 ]; do
 # Check Internet Connection
-wget -q --spider https://google.com --timeout=15
-if [ $? -eq 0 ]; then
+if ! wget -q --spider https://google.com --timeout=15
+then
 echo "[$(date)][---] Internet Connection Ready"
 
-
+{ 
+ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} 'echo "[$(date)][---] End-Point is ready"'
+} || { 
+echo "[$(date)][!!!] End-Point failed to login"
 #Setup Server - Uncomment to setup server
-if [ $REMOTE_SETUP -eq 1 ]; then
+if [ ${REMOTE_SETUP} -eq 1 ]; then
 	#Upload Current SSH Key
 	echo "[$(date)][>>>] Passing Key..."
-	scp $COMMON_OPT -o Port=$REMOTE_PORT $KEY ${REMOTE_USER}@${REMOTE_HOST}:${KEY}
-	echo "[$(date)][>>>] Setting up server..."
-	cat ${KEY}.pub | ssh $REMOTE_HOST -l $REMOTE_USER -p $REMOTE_PORT -i ~/.ssh/id_rsa $COMMON_OPT 'cat >> /root/.ssh/authorized_keys'
-	ssh $REMOTE_HOST -l $REMOTE_USER -p $REMOTE_PORT -i ~/.ssh/id_rsa $COMMON_OPT << EOF
+	scp ${COMMON_OPT} -o Port=${REMOTE_PORT} ${KEY} ${REMOTE_USER}@${REMOTE_HOST}:${KEY}
+	echo "[$(date)][>>>] Setting up the Key..."
+	echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
+	ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ~/.ssh/id_rsa ${COMMON_OPT} << EOF
+		echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
 		echo "LANTIS" > /etc/motd
 EOF
+	echo "[$(date)][---] Config Complete"
 fi
+}
 
 # Bypass Inbound NAT
-if [ $LOCAL_OPEN -eq 0 ]; then
-REMOTE_PFWD="-R $LOCAL_PORT:127.0.0.1:22"
-LOCAL_IP=127.0.0.1
+if [ ${LOCAL_OPEN} -eq 0 ]; then
+LOCAL_IP="127.0.0.1 -R ${LOCAL_PORT}:127.0.0.1:22"
+elif [ ${LOCAL_OPEN} -eq 1 ]; then
+LOCAL_IP="$(curl ipinfo.io/ip 2> /dev/null)"
 fi
-
-{ 
-ssh $REMOTE_HOST -l $REMOTE_USER -p $REMOTE_PORT -i $KEY $COMMON_OPT "echo "[$(date)][---] End-Point is ready""
 
 #Start Stage 2 and Connect Back
 echo "[$(date)][>>>] Establishing Control line..." 
 
-if [ $LOCAL_OPEN -eq 1 ]; then
-REMOTE_PFWD=""
-LOCAL_IP=$(curl ipinfo.io/ip 2> /dev/null)
-fi
-
-ssh $REMOTE_HOST -l $REMOTE_USER -p $REMOTE_PORT -i $KEY $COMMON_OPT $REMOTE_PFWD << EOF
+ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} << EOF
 	#Kill stale SSH port forwarding
-	if [ $REMOTE_KILL80 -eq 1 ]; then
+	if [ ${REMOTE_KILL80} -eq 1 ]; then
 		echo "[$(date)][>>>] Sanitizing End-Point..."
-		netstat -tlpn | grep ":80 " | sed -n 's@.* \([0-9]*\)/ssh.*@kill \1@p' | sh > /dev/null
+		netstat -tlpn | grep ":${LOCAL_WEBPORT} " | sed -n 's@.* \([0-9]*\)/ssh.*@kill \1@p' | sh > /dev/null
 	fi
-	if [ $LOCAL_OPEN -eq 1 ]; then
+	if [ ${LOCAL_OPEN} -eq 1 ]; then
 		echo "[$(date)][<<<] Reverse Conection will be used"
 	fi
 	echo "[$(date)][<<<] Linked! Accepting Incoming Connections..."
 	# SSH back in for port fowarding
-	ssh $LOCAL_IP -l $LOCAL_USER -p $LOCAL_PORT -i $KEY $LOCAL_OPT $COMMON_OPT
-	echo "[$(date)][!!!] ERROR! Early Termination of line!"
+	ssh $LOCAL_IP -l ${LOCAL_USER} -p ${LOCAL_PORT} -i ${KEY} $LOCAL_OPT ${COMMON_OPT}
+	echo "[$(date)][!!!] ERROR! Early Termination!"
 EOF
-} || { 
-echo "[$(date)][!!!] End-Point Error!"
-}
+
 else
 #Else, Connection failed
 echo "[$(date)][!!!] ERROR! Internet Connection is not ready!"
