@@ -6,14 +6,17 @@
 LOCAL_USER=root               # User to login as
 LOCAL_PORT=65500              # Local SSH port to connect back into
 LOCAL_WEBHOST=127.0.0.1       # Server Host to rouute web traffic to
-LOCAL_WEBPORT=80              # Server Port
+LOCAL_WEBPORT1=80             # Server Port (HTTP)
+LOCAL_WEBPORT2=443            # Server Port (HTTPS)
 LOCAL_OPEN=0                  # Is your local site ports open? Bypass NAT otherwise
 
 ### Remote Config - End Point for presentation
 REMOTE_HOST=104.236.243.143   # Server to use
 REMOTE_USER=root              # User to login as
 REMOTE_PORT=22                # SSH port of Remote Server
-REMOTE_KILL80=1               # Kill what ever is using port 80
+REMOTE_WEBPORT1=80             # Server Port (HTTP)
+REMOTE_WEBPORT2=443            # Server Port (HTTPS)
+REMOTE_KILL=1                 # Kill what ever is using port #1
 REMOTE_SETUP=1                # Setup Remote Host
 
 #Keys - Common key shared between hosts
@@ -21,7 +24,7 @@ KEY=/root/lantis.key          # SSH Key to auth with for both directions
 
 #SSH Options - Options used for connection
 COMMON_OPT="-C -2 -o BatchMode=yes -o StrictHostKeyChecking=no -o TCPKeepAlive=yes -o ServerAliveInterval=5 -o ConnectTimeout=15 -o LogLevel=Error"
-LOCAL_OPT="-N -o CompressionLevel=9 -o ExitOnForwardFailure=yes -g -L ${LOCAL_WEBPORT}:${LOCAL_WEBHOST}:${LOCAL_WEBPORT} -L 443:${LOCAL_WEBHOST}:443"
+LOCAL_OPT="-N -o CompressionLevel=9 -o ExitOnForwardFailure=yes -g -L ${REMOTE_WEBPORT1}:${LOCAL_WEBHOST}:${LOCAL_WEBPORT1} -L ${REMOTE_WEBPORT2}:${LOCAL_WEBHOST}:${LOCAL_WEBPORT2}"
 
 
 
@@ -80,7 +83,7 @@ echo "[$(date)][>>>] Establishing Control line..."
 
 ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} << EOF
 	#Kill stale SSH port forwarding
-	if [ ${REMOTE_KILL80} -eq 1 ]; then
+	if [ ${REMOTE_KILL} -eq 1 ]; then
 		echo "[$(date)][>>>] Sanitizing End-Point..."
 		netstat -tlpn | grep ":${LOCAL_WEBPORT} " | sed -n 's@.* \([0-9]*\)/ssh.*@kill \1@p' | sh > /dev/null
 	fi
