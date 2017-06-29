@@ -6,6 +6,7 @@
 LOCAL_USER=root               # User to login as
 LOCAL_PORT=65500              # Local SSH port to connect back into
 LOCAL_WEBHOST=127.0.0.1       # Server to rouute web traffic to
+LOCAL_OPEN=1                  # Is your local site ports open? Bypass NAT otherwise
 
 ### Remote Config - End Point for presentation
 REMOTE_HOST=104.236.243.143   # Server to use
@@ -58,12 +59,24 @@ if [ $REMOTE_SETUP -eq 1 ]; then
 EOF
 fi
 
+# Bypass Inbound NAT
+if [ $LOCAL_OPEN -eq 0 ]; then
+REMOTE_PFWD="-L $LOCAL_PORT:127.0.0.1:22"
+LOCAL_IP=127.0.0.1
+fi
+
 { 
 ssh $REMOTE_HOST -l $REMOTE_USER -p $REMOTE_PORT -i $KEY $COMMON_OPT "echo "[$(date)][---] End-Point is ready""
 
 #Start Stage 2 and Connect Back
 echo "[$(date)][>>>] Establishing Control line..." 
-ssh $REMOTE_HOST -l $REMOTE_USER -p $REMOTE_PORT -i $KEY $COMMON_OPT << EOF
+
+if [ $LOCAL_OPEN -eq 1 ]; then
+REMOTE_PFWD=""
+LOCAL_IP=$(curl ipinfo.io/ip 2> /dev/null)
+fi
+
+ssh $REMOTE_HOST -l $REMOTE_USER -p $REMOTE_PORT -i $KEY $COMMON_OPT $REMOTE_PFWD << EOF
 	#Kill stale SSH port forwarding
 	if [ $REMOTE_KILL80 -eq 1 ]; then
 		echo "[$(date)][>>>] Sanitizing End-Point..."
@@ -71,7 +84,7 @@ ssh $REMOTE_HOST -l $REMOTE_USER -p $REMOTE_PORT -i $KEY $COMMON_OPT << EOF
 	fi
 	echo "[$(date)][<<<] Linked! Accepting Incoming Connections..."
 	# SSH back in for port fowarding
-	ssh $(curl ipinfo.io/ip 2> /dev/null) -l $LOCAL_USER -p $LOCAL_PORT -i $KEY $LOCAL_OPT $COMMON_OPT
+	ssh $LOCAL_IP -l $LOCAL_USER -p $LOCAL_PORT -i $KEY $LOCAL_OPT $COMMON_OPT
 	echo "[$(date)][!!!] ERROR! Early Termination of line!"
 EOF
 } || { 
