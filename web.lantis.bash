@@ -61,7 +61,7 @@ fi
 
 # Bypass Inbound NAT
 if [ $LOCAL_OPEN -eq 0 ]; then
-REMOTE_PFWD="-L $LOCAL_PORT:127.0.0.1:22"
+REMOTE_PFWD="-R $LOCAL_PORT:127.0.0.1:22"
 LOCAL_IP=127.0.0.1
 fi
 
