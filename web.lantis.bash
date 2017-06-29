@@ -30,8 +30,10 @@ cat << EOF
     /_____/_/  |_/_/ |_/ /_/ /___//____/  
     Lain Anonymous NetworkIng System
     by : Academy City Research
+	
+	support : help.lantis.project@acr.moe
 
-Usage:
+ Usage:
 
 	Remote Host ===========================================================
 
@@ -59,7 +61,7 @@ Usage:
 		the firewall or router. (Default: Use Direct Connection)
 
 	-K  Kill what ever is using port 1 to make way for this connection 
-		(AKA Hijack the port)
+		(This only kills SSH connections)
 
 	-S  Setup Remote Server
 		This will setup the remote host if auth fails 
@@ -67,12 +69,43 @@ Usage:
 
 	-C  Source File to use
 	
+	-Z  Display Setup Guide
+
+EOF
+}
+SETUPGUIDE(){
+cat << EOF
+        __    ___    _   _________________
+       / /   /   |  / | / /_  __/  _/ ___/
+      / /   / /| | /  |/ / / /  / / \__ \ 
+     / /___/ ___ |/ /|  / / / _/ / ___/ / 
+    /_____/_/  |_/_/ |_/ /_/ /___//____/  
+    Lain Anonymous NetworkIng System
+    by : Academy City Research
+	
+	support : help.lantis.project@acr.moe
+
+Setup Guide:
+
+1) Generate a SSH key in ~/.ssh/id_rsa
+      [root@local]~ ssh-keygen –b 4086
+2) Add id_rsa.pub to /root /.ssh/authorized_keys on the remote server
+3) Generate a SSH key for LANTIS in your current directory where the script will stay
+      [root@local]~/LANTIS ssh-keygen –b 4096 –f lantis.key
+4) Run this script with –S to auto-setup the remote server and any other options you need like -R
+      [root@local]~/LANTIS lantis.bash –h 123.45.67.89 –S 
+5) You should be fine as long as your destination host allows your default ssh key
+6) Normaly use:
+      [root@local]~/LANTIS nohup bash lantis.bash –h 123.45.67.89
+	  nohup: ignoring input and appending output to ‘nohup.out’
+	  [root@local]~/LANTIS tail nohup.out
+
 EOF
 }
 
 
 
-while getopts "h:puPUHabABSRKC" opt; do
+while getopts "h:puPUHabABSRKCZ" opt; do
   case $opt in
 	h) REMOTE_HOST=${OPTARG};;
 	p) REMOTE_PORT=${OPTARG};;
@@ -88,11 +121,13 @@ while getopts "h:puPUHabABSRKC" opt; do
 	R) LOCAL_OPEN=0;;
 	K) REMOTE_KILL=1;;
 	C) source ${OPTARG};;
+	Z) SETUPGUIDE; exit;;
     \?) echo "[PEBKAC] WTF is -$OPTARG?, thats not a accepted option, Abort"; USAGE; exit 1;;
     :) echo "[PEBKAC] -$OPTARG requires an argument, Abort"; USAGE; exit 1;;
   esac
 done
- if [ $# -lt 1 ]; then USAGE; exit; fi
+
+if [ $# -lt 1 ]; then USAGE; exit; fi
 
 ####################                                                                                                               ####################
 
@@ -131,9 +166,9 @@ if [ ${REMOTE_SETUP} -eq 1 ]; then
 	echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
 	ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ~/.ssh/id_rsa ${COMMON_OPT} << EOF
 		echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
-		echo "LANTIS" > /etc/motd
+		#echo "LANTIS" > /etc/motd
 EOF
-	echo "[$(date)][---] Config Complete"
+	echo "[$(date)][---] Auto-Setup Complete"
 fi
 }
 
