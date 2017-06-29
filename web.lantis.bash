@@ -1,22 +1,21 @@
 #!/bin/bash
 
-# LANTIS EasyConnect #
+# LANTIS EasyLink 2 #
 
 ### Local Config - This host
-LOCAL_USER=root
-LOCAL_PORT=65500
-LOCAL_WEBHOST=127.0.0.1
+LOCAL_USER=root               # User to login as
+LOCAL_PORT=65500              # Local SSH port to connect back into
+LOCAL_WEBHOST=127.0.0.1       # Server to rouute web traffic to
 
 ### Remote Config - End Point for presentation
-REMOTE_HOST=104.236.243.143
-REMOTE_USER=root
-REMOTE_PORT=22
-REMOTE_KILL80=1
-# Setup Remote Host
-REMOTE_SETUP=0
+REMOTE_HOST=104.236.243.143   # Server to use
+REMOTE_USER=root              # User to login as
+REMOTE_PORT=22                # SSH port of Remote Server
+REMOTE_KILL80=1               # Kill what ever is using port 80
+REMOTE_SETUP=0                # Setup Remote Host
 
 #Keys - Common key shared between hosts
-KEY=/root/lantis.key
+KEY=/root/lantis.key          # SSH Key to auth with for both directions
 
 #SSH Options - Options used for connection
 COMMON_OPT="-C -2 -o BatchMode=yes -o StrictHostKeyChecking=no -o TCPKeepAlive=yes -o ServerAliveInterval=5 -o ConnectTimeout=15 -o LogLevel=Error"
@@ -27,7 +26,11 @@ LOCAL_OPT="-N -o CompressionLevel=9 -o ExitOnForwardFailure=yes -g -L 80:${LOCAL
 
 
 
+
+
 ####################                                                                                                               ####################
+
+
 
 
 
@@ -48,7 +51,7 @@ if [ $REMOTE_SETUP -eq 1 ]; then
 	#Upload Current SSH Key
 	echo "[$(date)][>>>] Passing Key..."
 	scp $COMMON_OPT -o Port=$REMOTE_PORT $KEY ${REMOTE_USER}@${REMOTE_HOST}:${KEY}
-	echo "[$(date)][~~~] Setting up End-Point..."
+	echo "[$(date)][>>>] Setting up server..."
 	cat ${KEY}.pub | ssh $REMOTE_HOST -l $REMOTE_USER -p $REMOTE_PORT -i ~/.ssh/id_rsa $COMMON_OPT 'cat >> /root/.ssh/authorized_keys'
 	ssh $REMOTE_HOST -l $REMOTE_USER -p $REMOTE_PORT -i ~/.ssh/id_rsa $COMMON_OPT << EOF
 		echo "LANTIS" > /etc/motd
@@ -64,7 +67,7 @@ ssh $REMOTE_HOST -l $REMOTE_USER -p $REMOTE_PORT -i $KEY $COMMON_OPT << EOF
 	#Kill stale SSH port forwarding
 	if [ $REMOTE_KILL80 -eq 1 ]; then
 		echo "[$(date)][>>>] Sanitizing End-Point..."
-		netstat -tlpn | grep ":80 " | sed -n 's@.* \([0-9]*\)/ssh.*@kill \1@p' | sudo sh
+		netstat -tlpn | grep ":80 " | sed -n 's@.* \([0-9]*\)/ssh.*@kill \1@p' | sh > /dev/null
 	fi
 	echo "[$(date)][<<<] Linked! Accepting Incoming Connections..."
 	# SSH back in for port fowarding
