@@ -14,8 +14,8 @@ LOCAL_OPEN=0                  # Is your local site ports open? Bypass NAT otherw
 REMOTE_HOST=104.236.243.143   # Server to use
 REMOTE_USER=root              # User to login as
 REMOTE_PORT=22                # SSH port of Remote Server
-REMOTE_WEBPORT1=80             # Server Port (HTTP)
-REMOTE_WEBPORT2=443            # Server Port (HTTPS)
+REMOTE_WEBPORT1=80            # Server Port (HTTP)
+REMOTE_WEBPORT2=443           # Server Port (HTTPS)
 REMOTE_KILL=1                 # Kill what ever is using port #1
 REMOTE_SETUP=1                # Setup Remote Host
 
