@@ -68,15 +68,17 @@ fi
 
 # Bypass Inbound NAT
 if [ ${LOCAL_OPEN} -eq 0 ]; then
-LOCAL_IP="127.0.0.1 -R ${LOCAL_PORT}:127.0.0.1:22"
+REMOTE_PFWD=" -R ${LOCAL_PORT}:127.0.0.1:22"
+LOCAL_IP="127.0.0.1"
 elif [ ${LOCAL_OPEN} -eq 1 ]; then
+REMOTE_PFWD=""
 LOCAL_IP="$(curl ipinfo.io/ip 2> /dev/null)"
 fi
 
 #Start Stage 2 and Connect Back
 echo "[$(date)][>>>] Establishing Control line..." 
 
-ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} << EOF
+ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} << EOF
 	#Kill stale SSH port forwarding
 	if [ ${REMOTE_KILL80} -eq 1 ]; then
 		echo "[$(date)][>>>] Sanitizing End-Point..."
