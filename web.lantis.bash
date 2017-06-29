@@ -174,9 +174,9 @@ ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} $
 	ssh $LOCAL_IP -l ${LOCAL_USER} -p ${LOCAL_PORT} -i ${KEY} $LOCAL_OPT ${COMMON_OPT}
 	echo "[$(date)][!!!] ERROR! Early Termination!"
 EOF
-else # ELSE - Internet Verification ###########################################################
+else # ELSE - Internet Verification #####################################################
 echo "[$(date)][!!!] ERROR! Internet Connection is not ready!"
-fi # END - Internet Verification ###########################################################
+fi # END - Internet Verification ########################################################
 echo "[$(date)][!!!] ERROR! Connection Failed!"
 sleep 2
 done # Main Loop ######################################################################################################
