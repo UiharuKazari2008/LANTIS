@@ -97,8 +97,8 @@ Setup Guide:
 5) You should be fine as long as your destination host allows your default ssh key
 6) Normaly use:
       [root@local]~/LANTIS nohup bash lantis.bash –h 123.45.67.89
-	  nohup: ignoring input and appending output to ‘nohup.out’
-	  [root@local]~/LANTIS tail nohup.out
+      nohup: ignoring input and appending output to ‘nohup.out’
+      [root@local]~/LANTIS tail nohup.out
 
 EOF
 }
