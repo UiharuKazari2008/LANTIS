@@ -88,7 +88,7 @@ while getopts "RrKkXCZ" opt; do
 done
 # Display Usage with no options
 if [ $# -lt 1 ]; then USAGE; exit; fi
-
+echo ${PORT_LIST}
 WATCHDOG_GEN() {
 while read in; do # For Each Connection #################################################
 # e;test;remote.com;22;root;127.0.0.1;22;root;n;y;y;8989;192.168.0.2;8894;p
