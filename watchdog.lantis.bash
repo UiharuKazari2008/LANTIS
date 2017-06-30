@@ -2,7 +2,7 @@
 # LANTIS EasyLink 2 #
 # Stop if no options
 if [ $# -lt 1 ]; then echo "No Data"; exit 1; fi
-REMOTE_PORTPUB=""; DRY=0; LOCAL_OPEN=1
+REMOTE_PORTPUB=""; DRY=0; LOCAL_OPEN=1; REMOTE_KILL=0
 # Parse Options
 while getopts "n:h:p:u:H:P:U:D:t:T:LSRKX" opt; do 
   case $opt in
