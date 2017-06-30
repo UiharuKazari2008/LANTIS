@@ -127,8 +127,8 @@ while read in; do # For Each Connection ########################################
 CONNECTION_STATUS=$(echo $in | awk -F '[;]' '{print $1}') #Enabled[E or D]
 CONNECTION_NAME=$(echo $in | awk -F '[;]' '{print $2}')   #Name[string]
 REMOTE_FWDPORT=$(echo $in | awk -F '[;]' '{print $3}')    #Remote Port[int]
-LOCAL_FWDPORT=$(echo $in | awk -F '[;]' '{print $4}')     #Local Host[string]
-LOCAL_FWDHOST=$(echo $in | awk -F '[;]' '{print $5}')     #Local Port[int]
+LOCAL_FWDHOST=$(echo $in | awk -F '[;]' '{print $4}')     #Local Host[string]
+LOCAL_FWDPORT=$(echo $in | awk -F '[;]' '{print $5}')     #Local Port[int]
 REMOTE_FWDPUB=$(echo $in | awk -F '[;]' '{print $6}')     #Public or Local[P or L]
 if [ ${REMOTE_FWDPUB} = "P" ]; then REMOTE_FWDPUBLIC="-g -L ${REMOTE_FWDPORT}:${LOCAL_FWDHOST}:${LOCAL_FWDPORT}"
 elif [ ${REMOTE_FWDPUB} = "L" ]; then REMOTE_FWDPUBLIC="-L ${REMOTE_FWDPORT}:${LOCAL_FWDHOST}:${LOCAL_FWDPORT}"
