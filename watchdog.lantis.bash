@@ -4,7 +4,7 @@
 if [ $# -lt 1 ]; then echo "No Data"; exit 1; fi
 REMOTE_PORTPUB=""; DRY=0
 # Parse Options
-while getopts "n:h:p:u:H:P:U:D:t:T:LSRK" opt; do 
+while getopts "n:h:p:u:H:P:U:D:t:T:LSRKX" opt; do 
   case $opt in
 	n) CONNECTION_NAME=${OPTARG};;
 	h) REMOTE_HOST=${OPTARG};;
