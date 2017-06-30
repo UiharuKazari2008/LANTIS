@@ -81,25 +81,6 @@ cat << EOF
 
 EOF
 
-# Parse Options
-while getopts "h:puPUSRKC:Z" opt; do
-  case $opt in
-	h) REMOTE_HOST=${OPTARG};;
-	p) REMOTE_PORT=${OPTARG};;
-	u) REMOTE_USER=${OPTARG};;
-	P) LOCAL_PORT=${OPTARG};;
-	U) LOCAL_USER=${OPTARG};;
-	S) REMOTE_SETUP=1;;
-	R) LOCAL_OPEN=0;;
-	K) REMOTE_KILL=1;;
-	C) source ${OPTARG};;
-	Z) SETUPGUIDE; exit;;
-    \?) echo "[PEBKAC] WTF is -$OPTARG?, thats not a accepted option, Abort"; USAGE; exit 1;;
-    :) echo "[PEBKAC] -$OPTARG requires an argument, Abort"; USAGE; exit 1;;
-  esac
-done
-# Display Usage with no options
-if [ $# -lt 1 ]; then USAGE; exit; fi
 
 echo "= LANTIS Router 3 - Academy City Research ========="
 echo "[---------][$(date)][ OK ] System Ready"
