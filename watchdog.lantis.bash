@@ -76,6 +76,7 @@ elif [ ${LOCAL_OPEN} -eq 1 ]; then # Use Direct Connection
 fi
 #Start Stage 2 and Connect Back
 echo "[${CONNECTION_NAME}][$(date)][INFO][>>>] Establishing Control..." 
+if [ ${DRY} -eq 1 ]; then echo "ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} <<"; fi
 ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} << EOF
 	if [ ${REMOTE_KILL} -eq 1 ]; then # Kill stale SSH port forwarding
 		echo "[${CONNECTION_NAME}][$(date)][INFO][<<<] Sanitizing End-Point..."
