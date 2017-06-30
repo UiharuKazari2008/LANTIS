@@ -82,8 +82,8 @@ ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} $
 		netstat -tlpn | grep ":${REMOTE_FWDPORT} " | sed -n 's@.* \([0-9]*\)/ssh.*@kill \1@p' | sh > /dev/null
 	fi
 	echo "[${CONNECTION_NAME}][$(date)][INFO][<<<] Linked!"
-	if [ ${DRY} -eq 1 ]; then echo "ssh $(LOCAL_IP) -l ${LOCAL_USER} -p ${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT} ${REMOTE_PORTPUB}${LOCAL_PFWD}"
-	else ssh $(LOCAL_IP) -l ${LOCAL_USER} -p ${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT} ${REMOTE_PORTPUB}${LOCAL_PFWD}; fi
+	if [ ${DRY} -eq 1 ]; then echo "ssh ${LOCAL_IP} -l ${LOCAL_USER} -p ${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT} ${REMOTE_PORTPUB}${LOCAL_PFWD}"
+	else ssh ${LOCAL_IP} -l ${LOCAL_USER} -p ${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT} ${REMOTE_PORTPUB}${LOCAL_PFWD}; fi
 	echo "[${CONNECTION_NAME}][$(date)][ERR!][<<<] ETOL"
 EOF
 if [ ${DRY} -eq 1 ]; then exit 0; fi
