@@ -141,7 +141,7 @@ sleep 7
 elif [ ${CONNECTION_STATUS} = "d" ]; then
 echo "[${CONNECTION_NAME}][$(date)][ERR!] DISABLED"
 fi
-done < ${PORT_LIST} # For Each Connection ########################################### 
+done < $PORT_LIST # For Each Connection ########################################### 
 }
 
 cat << EOF
