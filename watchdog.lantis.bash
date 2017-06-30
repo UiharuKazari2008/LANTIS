@@ -48,10 +48,10 @@ echo "[${CONNECTION_NAME}][$(date)][INFO] Outbound Internet Connection:  Passed"
 echo "[${CONNECTION_NAME}][$(date)][INFO] Outbound End-Point:            Passed"
 EOF
 } || { 
-# FAULT - Host Verification #############################################################
+{ # FAULT - Host Verification #############################################################
 echo "[${CONNECTION_NAME}][$(date)][ERR!] Outbound End-Point:            No Shell Access/Failed"
 if [ ${REMOTE_SETUP} -eq 1 ]; then # Setup Server #######################################
-	{echo "[${CONNECTION_NAME}][$(date)][INFO] Passing Key to End-Point..."
+	echo "[${CONNECTION_NAME}][$(date)][INFO] Passing Key to End-Point..."
 	scp ${COMMON_OPT} -o Port=${REMOTE_PORT} ${KEY} ${REMOTE_USER}@${REMOTE_HOST}:${KEY}
 	ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ~/.ssh/id_rsa ${COMMON_OPT} << EOF
 		echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
@@ -65,8 +65,8 @@ EOF
 EOF
 	fi
 	echo "[${CONNECTION_NAME}][$(date)][INFO] Key Exchange Complete"
-	} || { echo "[${CONNECTION_NAME}][$(date)][ERR!] Key Exchange Failed!"; exit 1 }
 fi # Setup Server #######################################################################
+} || { echo "[${CONNECTION_NAME}][$(date)][ERR!] Key Exchange Failed!"; exit 1 }
 } # END - Host Verification #############################################################
 if [ ${LOCAL_OPEN} -eq 0 ]; then # Use Reverse SSH Tunneling
 	REMOTE_PFWD=" -R ${LOCAL_PORT}:127.0.0.1:22"; LOCAL_IP="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date)][INFO] Reverse Conection will be used"
