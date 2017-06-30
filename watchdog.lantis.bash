@@ -16,7 +16,7 @@ while getopts "n:h:p:u:H:P:U:D:t:T:LSRKX" opt; do
 	D) LOCAL_FWDHOST=${OPTARG};;
 	t) REMOTE_FWDPORT=${OPTARG};;
 	T) LOCAL_FWDPORT=${OPTARG};;
-	L) REMOTE_PORTPUB="-g ";;
+	L) REMOTE_PORTPUB=" -g";;
 	S) REMOTE_SETUP=1;;
 	R) LOCAL_OPEN=0;;
 	K) REMOTE_KILL=1;;
@@ -31,7 +31,7 @@ KEY=lantis.key          # SSH Key to auth with for both directions
 #SSH Options - Options used for connection
 COMMON_OPT="-C -2 -o BatchMode=yes -o StrictHostKeyChecking=no -o TCPKeepAlive=yes -o ServerAliveInterval=5 -o ConnectTimeout=15 -o LogLevel=Error"
 LOCAL_OPT="-N -o CompressionLevel=9 -o ExitOnForwardFailure=yes"
-LOCAL_PFWD="-L ${REMOTE_FWDPORT}:${LOCAL_FWDHOST}:${LOCAL_FWDPORT}"
+LOCAL_PFWD="${REMOTE_FWDPORT}:${LOCAL_FWDHOST}:${LOCAL_FWDPORT}"
 
 ########################################################################################################################
 
@@ -68,13 +68,12 @@ EOF
 fi # Setup Server #######################################################################
 } # END - Host Verification #############################################################
 if [ ${LOCAL_OPEN} -eq 0 ]; then # Use Reverse SSH Tunneling
-	REMOTE_PFWD=" -R ${LOCAL_PORT}:127.0.0.1:22"; 
-	LOCAL_IP="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date)][INFO] Reverse Conection will be used"
+	REMOTE_PFWD="-R ${LOCAL_PORT}:127.0.0.1:22"; LOCAL_IP="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date)][INFO] Reverse Conection will be used"
 elif [ ${LOCAL_OPEN} -eq 1 ]; then # Use Direct Connection
-	REMOTE_PFWD="";	if [ ${LOCAL_IP} = "~" ]; then 
-	LOCAL_IP="$(curl ipinfo.io/ip 2> /dev/null)"; fi
+	REMOTE_PFWD="";	if [ ${LOCAL_IP} = "~" ]; then LOCAL_IP="$(curl ipinfo.io/ip 2> /dev/null)"; fi
 fi
 #Start Stage 2 and Connect Back
+kill $(ps aux | grep "bash ./watchdog.lantis.bash -n ${CONNECTION_NAME} " | awk '{print $2}') > /dev/null
 echo "[${CONNECTION_NAME}][$(date)][INFO][>>>] Establishing Control..." 
 if [ ${DRY} -eq 1 ]; then echo "ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} <<"; fi
 ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} << EOF
@@ -83,8 +82,9 @@ ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} $
 		netstat -tlpn | grep ":${REMOTE_FWDPORT} " | sed -n 's@.* \([0-9]*\)/ssh.*@kill \1@p' | sh > /dev/null
 	fi
 	echo "[${CONNECTION_NAME}][$(date)][INFO][<<<] Linked!"
+	kill $(ps aux | grep "${LOCAL_PFWD}" | awk '{print $2}') > /dev/null
 	if [ ${DRY} -eq 1 ]; then echo "ssh ${LOCAL_IP} -l ${LOCAL_USER} -p ${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT} ${REMOTE_PORTPUB}${LOCAL_PFWD}"
-	else ssh ${LOCAL_IP} -l ${LOCAL_USER} -p ${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT} ${REMOTE_PORTPUB}${LOCAL_PFWD}; fi
+	else ssh ${LOCAL_IP} -l ${LOCAL_USER} -p ${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} -L ${LOCAL_PFWD}; fi
 	echo "[${CONNECTION_NAME}][$(date)][ERR!][<<<] ETOL"
 EOF
 if [ ${DRY} -eq 1 ]; then exit 0; fi
