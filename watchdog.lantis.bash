@@ -1,7 +1,7 @@
 #!/bin/bash
 # LANTIS EasyLink 2 #
 # Stop if no options
-if [ $# -lt 1 ]; echo "No Data" exit 1; fi
+if [ $# -lt 1 ]; echo "No Data"; exit 1; fi
 REMOTE_PORTPUB=""; DRY=0
 # Parse Options
 while getopts "n:h:p:u:H:P:U:D:t:T:LSRK" opt; do 
