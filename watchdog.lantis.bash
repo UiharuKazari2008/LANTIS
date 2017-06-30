@@ -73,7 +73,6 @@ elif [ ${LOCAL_OPEN} -eq 1 ]; then # Use Direct Connection
 	REMOTE_PFWD="";	if [ ${LOCAL_IP} = "~" ]; then LOCAL_IP="$(curl ipinfo.io/ip 2> /dev/null)"; fi
 fi
 #Start Stage 2 and Connect Back
-kill $(ps aux | grep "bash ./watchdog.lantis.bash -n ${CONNECTION_NAME} " | awk '{print $2}') > /dev/null
 echo "[${CONNECTION_NAME}][$(date)][INFO][>>>] Establishing Control..." 
 if [ ${DRY} -eq 1 ]; then echo "ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} <<"; fi
 ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} << EOF
