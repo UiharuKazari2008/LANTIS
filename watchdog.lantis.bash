@@ -68,9 +68,11 @@ EOF
 fi # Setup Server #######################################################################
 } # END - Host Verification #############################################################
 if [ ${LOCAL_OPEN} -eq 0 ]; then # Use Reverse SSH Tunneling
-	REMOTE_PFWD=" -R ${LOCAL_PORT}:127.0.0.1:22"; LOCAL_IP="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date)][INFO] Reverse Conection will be used"
+	REMOTE_PFWD=" -R ${LOCAL_PORT}:127.0.0.1:22"; 
+	LOCAL_IP="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date)][INFO] Reverse Conection will be used"
 elif [ ${LOCAL_OPEN} -eq 1 ]; then # Use Direct Connection
-	REMOTE_PFWD="";	if [ ${LOCAL_IP} = "~" ]; then LOCAL_IP="$(curl ipinfo.io/ip 2> /dev/null)"; fi
+	REMOTE_PFWD="";	if [ ${LOCAL_IP} = "~" ]; then 
+	LOCAL_IP="$(curl ipinfo.io/ip 2> /dev/null)"; fi
 fi
 #Start Stage 2 and Connect Back
 echo "[${CONNECTION_NAME}][$(date)][INFO][>>>] Establishing Control..." 
