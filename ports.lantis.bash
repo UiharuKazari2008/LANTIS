@@ -184,5 +184,5 @@ echo "[${CONNECTION_NAME}][$(date)][!!!] ERROR! Connection Failed!"
 sleep 2
 done # Main Loop ######################################################################################################
 }
-nohup LINK_WATCHDOG &
+LINK_WATCHDOG &
 done < ports.lantis.csv # For Each Connection ########################################### 
