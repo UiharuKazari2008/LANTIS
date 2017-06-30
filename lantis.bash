@@ -73,14 +73,13 @@ cat << EOF
 EOF
 }
 # Parse Options
-while getopts "RrKkXCZ" opt; do 
+while getopts "RrKkXZ" opt; do 
   case $opt in
 	R) RUN=2;REQ_CONNECTION_NAME=${OPTARG};;
 	r) RUN=1;;
 	K) RUN=4;REQ_CONNECTION_NAME=${OPTARG};;
 	k) RUN=3;;
 	X) DRY=1;;
-	C) PORT_LIST="${OPTARG}";;
     Z) SETUPGUIDE; exit;;
     \?) echo "[PEBKAC] WTF is -$OPTARG?, thats not a accepted option, Abort"; USAGE; exit 1;;
     :) echo "[PEBKAC] -$OPTARG requires an argument, Abort"; USAGE; exit 1;;
@@ -88,7 +87,7 @@ while getopts "RrKkXCZ" opt; do
 done
 # Display Usage with no options
 if [ $# -lt 1 ]; then USAGE; exit; fi
-echo ${PORT_LIST}
+
 WATCHDOG_GEN() {
 while read in; do # For Each Connection #################################################
 # e;test;remote.com;22;root;127.0.0.1;22;root;n;y;y;8989;192.168.0.2;8894;p
