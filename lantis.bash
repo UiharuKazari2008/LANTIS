@@ -119,7 +119,7 @@ if [ ${REMOTE_SETUP} = "y" ]; then EXTRA_OPT="${EXTRA_OPT} -S"; fi
 if [ ${LOCAL_OPEN} = "y" ]; then EXTRA_OPT="${EXTRA_OPT} -R"; fi
 if [ ${REMOTE_KILL} = "y" ]; then EXTRA_OPT="${EXTRA_OPT} -K"; fi
 
-if [ ${CONNECTION_STATUS} = "y" ]; then
+if [ ${CONNECTION_STATUS} = "e" ]; then
 echo "[${CONNECTION_NAME}][$(date)][INFO] Launching..."
 echo ".\watchdog.lantis.bash -q -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
 -H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT}"
