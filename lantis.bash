@@ -80,7 +80,7 @@ while getopts "RrKkXCZ" opt; do
 	K) RUN=4;REQ_CONNECTION_NAME=${OPTARG};;
 	k) RUN=3;;
 	X) DRY=1;;
-	C) PORT_LIST==${OPTARG};;
+	C) PORT_LIST=${OPTARG};;
     Z) SETUPGUIDE; exit;;
     \?) echo "[PEBKAC] WTF is -$OPTARG?, thats not a accepted option, Abort"; USAGE; exit 1;;
     :) echo "[PEBKAC] -$OPTARG requires an argument, Abort"; USAGE; exit 1;;
