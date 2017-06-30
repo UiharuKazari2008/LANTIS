@@ -127,14 +127,14 @@ if [ ${REMOTE_SETUP} = "y" ]; then EXTRA_OPT="${EXTRA_OPT} -S"; fi
 if [ ${LOCAL_OPEN} = "y" ]; then EXTRA_OPT="${EXTRA_OPT} -R"; fi
 if [ ${REMOTE_KILL} = "y" ]; then EXTRA_OPT="${EXTRA_OPT} -K"; fi
 
-if [ ${RUN} -eq 2 ] && [ ${CONNECTION_NAME} != ${REQ_CONNECTION_NAME} ]; then CONNECTION_STATUS=s; fi
+if [ ${RUN} -eq 2 ] && [ ${CONNECTION_NAME} != "${REQ_CONNECTION_NAME}" ]; then CONNECTION_STATUS="s"; fi
 if [ ${CONNECTION_STATUS} = "e" ]; then
 echo "[${CONNECTION_NAME}][$(date)][INFO] Launching..."
-if [ ${DRY} -eq 1 ]; then echo ".\watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
+if [ ${DRY} -eq 1 ]; then echo ">>>> -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
 -H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT}"
-bash .\watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
+bash ./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
 -H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT} -X ${DRY};
-else nohup bash .\watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
+else nohup bash ./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
 -H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT} & fi
 sleep 7
 elif [ ${CONNECTION_STATUS} = "d" ]; then
@@ -155,5 +155,5 @@ cat << EOF
 EOF
 echo "= LANTIS Router 3 - Academy City Research ========="
 echo "[---------][$(date)][ OK ] System Ready"
-if [ ${RUN} = 1 ]; then WATCHDOG_GEN;
-elif [ ${RUN} = 2 ]; then WATCHDOG_GEN; fi
+if [ ${RUN} -eq 1 ]; then WATCHDOG_GEN;
+elif [ ${RUN} -eq 2 ]; then WATCHDOG_GEN; fi
