@@ -128,6 +128,7 @@ if [ ${LOCAL_OPEN} = "y" ]; then EXTRA_OPT="${EXTRA_OPT} -R"; fi
 if [ ${REMOTE_KILL} = "y" ]; then EXTRA_OPT="${EXTRA_OPT} -K"; fi
 
 if [ ${RUN} -eq 2 ] && [ ${CONNECTION_NAME} != "${REQ_CONNECTION_NAME}" ]; then CONNECTION_STATUS="s"; fi
+if [ ${RUN} -eq 2 ] && [ ${CONNECTION_NAME} = "${REQ_CONNECTION_NAME}" ]; then CONNECTION_STATUS="e"; fi
 if [ ${CONNECTION_STATUS} = "e" ]; then
 echo "[${CONNECTION_NAME}][$(date)][INFO] Launching..."
 if [ ${DRY} -eq 1 ]; then echo ">>>> -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
