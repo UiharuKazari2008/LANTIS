@@ -92,18 +92,18 @@ L_LOCAL_FWDHOST=$(echo $in | awk -F '[;]' '{print $13}')   #Server Local Host[st
 L_LOCAL_FWDPORT=$(echo $in | awk -F '[;]' '{print $14}')   #Server Local Port[int]
 L_REMOTE_FWDPUB=$(echo $in | awk -F '[;]' '{print $15}')   #Public or Local[P or L]
 
-if [ ${L_REMOTE_HOST}   != "" ]; then REMOTE_HOST=${L_REMOTE_HOST};     fi
-if [ ${L_REMOTE_PORT}   != "" ]; then REMOTE_PORT=${L_REMOTE_PORT};     fi
-if [ ${L_REMOTE_USER}   != "" ]; then REMOTE_USER=${L_REMOTE_USER};     fi
-if [ ${L_LOCAL_HOST}    != "" ]; then LOCAL_HOST=${L_LOCAL_HOST};       fi
-if [ ${L_LOCAL_PORT}    != "" ]; then LOCAL_PORT=${L_LOCAL_PORT};       fi
-if [ ${L_LOCAL_USER}    != "" ]; then LOCAL_USER=${L_LOCAL_USER};       fi
-if [ ${L_REMOTE_SETUP}  != "" ]; then REMOTE_SETUP=${L_REMOTE_SETUP};   fi
-if [ ${L_LOCAL_OPEN}    != "" ]; then LOCAL_OPEN=${L_LOCAL_OPEN};       fi
-if [ ${L_REMOTE_KILL}   != "" ]; then REMOTE_KILL=${L_REMOTE_KILL};     fi
-if [ ${L_LOCAL_FWDHOST} != "" ]; then LOCAL_FWDHOST=${L_LOCAL_FWDHOST}; fi
-if [ ${L_LOCAL_FWDPORT} != "" ]; then LOCAL_FWDPORT=${L_LOCAL_FWDPORT}; fi
-if [ ${L_REMOTE_FWDPUB} != "" ]; then REMOTE_FWDPUB=${L_REMOTE_FWDPUB}; fi
+if [ ${L_REMOTE_HOST}   != "^" ]; then REMOTE_HOST=${L_REMOTE_HOST};     fi
+if [ ${L_REMOTE_PORT}   != "^" ]; then REMOTE_PORT=${L_REMOTE_PORT};     fi
+if [ ${L_REMOTE_USER}   != "^" ]; then REMOTE_USER=${L_REMOTE_USER};     fi
+if [ ${L_LOCAL_HOST}    != "^" ]; then LOCAL_HOST=${L_LOCAL_HOST};       fi
+if [ ${L_LOCAL_PORT}    != "^" ]; then LOCAL_PORT=${L_LOCAL_PORT};       fi
+if [ ${L_LOCAL_USER}    != "^" ]; then LOCAL_USER=${L_LOCAL_USER};       fi
+if [ ${L_REMOTE_SETUP}  != "^" ]; then REMOTE_SETUP=${L_REMOTE_SETUP};   fi
+if [ ${L_LOCAL_OPEN}    != "^" ]; then LOCAL_OPEN=${L_LOCAL_OPEN};       fi
+if [ ${L_REMOTE_KILL}   != "^" ]; then REMOTE_KILL=${L_REMOTE_KILL};     fi
+if [ ${L_LOCAL_FWDHOST} != "^" ]; then LOCAL_FWDHOST=${L_LOCAL_FWDHOST}; fi
+if [ ${L_LOCAL_FWDPORT} != "^" ]; then LOCAL_FWDPORT=${L_LOCAL_FWDPORT}; fi
+if [ ${L_REMOTE_FWDPUB} != "^" ]; then REMOTE_FWDPUB=${L_REMOTE_FWDPUB}; fi
 
 if [ ${REMOTE_FWDPUB} = "p" ]; then EXTRA_OPT="${EXTRA_OPT} -L"; fi
 if [ ${REMOTE_SETUP} = "y" ]; then EXTRA_OPT="${EXTRA_OPT} -S"; fi
