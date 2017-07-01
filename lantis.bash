@@ -86,7 +86,7 @@ else
 	nohup bash ./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
 	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT} -m 2 &> ${LOG_FILE} &
 fi
-sleep ${}
+sleep ${TIME_DROP_PAUSE}
 }
 WATCHDOG_GEN() {
 while read in; do
