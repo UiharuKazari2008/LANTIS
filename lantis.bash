@@ -86,7 +86,7 @@ if [ ${DRY} -eq 1 ]; then
 else 
 	pkill -f "bash ./watchdog.lantis.bash -n ${CONNECTION_NAME}*" > /dev/null
 	nohup bash ./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
-	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT} -m ${1} &> ${LOG_FILE} & 
+	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT} -m ${1} &>> ${LOG_FILE} & 
 fi
 sleep $(if [ ${1} = 1 ]; then echo "${TIME_LAUNCH_PAUSE}"; elif [ ${1} = 2 ]; then echo "${TIME_DROP_PAUSE}"; fi)
 }
