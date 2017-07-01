@@ -19,19 +19,19 @@ cat << EOF
  support : help.lantis.project@acr.moe
 
  LANTIS EasyLink Router 2 - Usage:
-
- Run ===================================================================
- -l  Launch a Connecion
- -L  Launch ALL Connections
+ 
+ Launch ================================================================
+ -l  Launch a Connecion           -L  Launch ALL Connections
  
  Drop ==================================================================
- -k  Drop a Connection
- -K  Drop ALL Connections
+ -k  Drop a Connection            -K  Drop ALL Connections
 
- Extra Options =========================================================
+ Extra Options (MUST be set before a action) ===========================
  -C  Use another port list (Default: ./ports.lantis.csv)
  -X  Dry Run (Does not do any action but test full connection)
  -Z  Display Setup Guide
+
+ NOTE: You can give multiple actions (ex: -l admin -k ssh -l rdp)
 
 EOF
 }
@@ -49,6 +49,31 @@ cat << EOF
  4) Add the entry to the port list with the setup bit set to 1, run that connection
  5) You should be fine as long as your destination host allows your default ssh key
 
+ CSV File Guide:
+ 
+ NOTE: You can use "^" to use last value
+ NOTE: You can use "~" for Local Host to use your current Public IP (Updated on Connection Drop)
+ NOTE: Disabled connections are still read
+ NOTE: You can only use Public Ports 1-2014 if you are using Remote User root
+ WARN: There is little input verification, make sure you know what your doing
+ WARN: You cannot use the same local port when using Bypass NAT
+ 
+ 1 ) Enable or Disale Connection [e,d]
+ 2 ) Connection Name [string.no spaces]
+ 3 ) Remote Host [string]
+ 4 ) Remote Port [int]
+ 5 ) Remote User [string]
+ 6 ) Local Host [~ for dynamic ip]
+ 7 ) Local Port [int]
+ 8 ) Local User [string]
+ 9 ) Setup End Point [y or n]
+ 10) Bypass Inbound NAT [y or n]
+ 11) Hijack Port [y or n]
+ 12) Public Server Port [int]
+ 13) Local Server Host [string]
+ 14) Local Server Port [int]
+ 15) Public or Remote Host-Only [p or l]
+ 
 EOF
 }
 FORKER () {
