@@ -56,18 +56,19 @@ cat << EOF
 EOF
 }
 FORKER () {
-echo "[${CONNECTION_NAME}][$(date)][INFO] $(if [ ${RUN} = 1 ] || [ ${RUN} = 2 ]; then echo "Launching"; elif [ ${RUN} = 3 ] || [ ${RUN} = 4 ]; then echo "Dropping"; fi) Connection..."
+_RUN=0; if [ ${RUN} = 1 ] || [ ${RUN} = 2 ]; then _RUN=1; elif [ ${RUN} = 3 ] || [ ${RUN} = 4 ]; then _RUN=2; fi
+echo "[${CONNECTION_NAME}][$(date)][INFO] $(if [ ${_RUN} = 1 ]; then echo "Launching"; elif [ ${_RUN} = 2 ]; then echo "Dropping"; fi) Connection..."
 if [ ${DRY} -eq 1 ]; then 
 	echo "./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
 	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT}"
 	bash ./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
-	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT} -m 1 -X ${DRY}
+	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT} -m ${_RUN} -X ${DRY}
 else 
 	pkill -f "bash ./watchdog.lantis.bash -n ${CONNECTION_NAME}*" > /dev/null
 	nohup bash ./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
-	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT} -m 1 &> ${LOG_FILE} & 
+	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT} -m ${_RUN} &> ${LOG_FILE} & 
 fi
-sleep $(if [ ${RUN} = 1 ] || [ ${RUN} = 2 ]; then echo "${TIME_LAUNCH_PAUSE}"; elif [ ${RUN} = 3 ] || [ ${RUN} = 4 ]; then echo "${TIME_DROP_PAUSE}"; fi)
+sleep $(if [ ${_RUN} = 1 ]; then echo "${TIME_LAUNCH_PAUSE}"; elif [ ${_RUN} = 2 ]; then echo "${TIME_DROP_PAUSE}"; fi)
 }
 WATCHDOG() {
 while read in; do
