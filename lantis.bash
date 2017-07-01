@@ -2,7 +2,7 @@
 
 # LANTIS EasyLink 2 #
 # OPERATIONS ###########################################################################################################
-USAGE(){
+HEADER() {
 cat << EOF
      __    ___    _   _________________
     / /   /   |  / | / /_  __/  _/ ___/
@@ -11,7 +11,11 @@ cat << EOF
  /_____/_/  |_/_/ |_/ /_/ /___//____/  
  Lain Anonymous NetworkIng System
  by : Academy City Research
-	
+
+EOF
+}
+USAGE(){
+cat << EOF
  support : help.lantis.project@acr.moe
 
  LANTIS EasyLink Router 2 - Usage:
@@ -33,14 +37,6 @@ EOF
 }
 SETUPGUIDE(){
 cat << EOF
-     __    ___    _   _________________
-    / /   /   |  / | / /_  __/  _/ ___/
-   / /   / /| | /  |/ / / /  / / \__ \ 
-  / /___/ ___ |/ /|  / / / _/ / ___/ / 
- /_____/_/  |_/_/ |_/ /_/ /___//____/  
- Lain Anonymous NetworkIng System
- by : Academy City Research
-	
  support : help.lantis.project@acr.moe
 
  Setup Guide:
@@ -56,24 +52,22 @@ cat << EOF
 EOF
 }
 FORKER () {
-_RUN=0; if [ ${RUN} = 1 ] || [ ${RUN} = 2 ]; then _RUN=1; elif [ ${RUN} = 3 ] || [ ${RUN} = 4 ]; then _RUN=2; fi
-echo "[${CONNECTION_NAME}][$(date)][INFO] $(if [ ${_RUN} = 1 ]; then echo "Launching"; elif [ ${_RUN} = 2 ]; then echo "Dropping"; fi) Connection..."
+echo "[${CONNECTION_NAME}][$(date)][INFO] $(if [ ${1} = 1 ]; then echo "Launching"; elif [ ${1} = 2 ]; then echo "Dropping"; fi) Connection..."
 if [ ${DRY} -eq 1 ]; then 
 	echo "./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
 	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT}"
 	bash ./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
-	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT} -m ${_RUN} -X ${DRY}
+	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT} -m ${1} -X ${DRY}
 else 
 	pkill -f "bash ./watchdog.lantis.bash -n ${CONNECTION_NAME}*" > /dev/null
 	nohup bash ./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
-	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT} -m ${_RUN} &> ${LOG_FILE} & 
+	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT} -m ${1} &> ${LOG_FILE} & 
 fi
-sleep $(if [ ${_RUN} = 1 ]; then echo "${TIME_LAUNCH_PAUSE}"; elif [ ${_RUN} = 2 ]; then echo "${TIME_DROP_PAUSE}"; fi)
+sleep $(if [ ${1} = 1 ]; then echo "${TIME_LAUNCH_PAUSE}"; elif [ ${1} = 2 ]; then echo "${TIME_DROP_PAUSE}"; fi)
 }
 WATCHDOG() {
 while read in; do
 if [[ $(echo $in | awk -F '[ ]' '{print $1}') != "#" ]]; then
-	# Enable or Disabled;Name;Remote Host;R Port;R User;Local Host [~ uses current public ip];L Port;L User;Setup [y or n];Bypass NAT [y or n];Kill Current Port [y or n];Public Port;Server Host;Server Port;Public or Local [p or l]
 	SKIP=0; EXTRA_OPT=""; 
 	CONNECTION_STATUS=$(echo $in | awk -F '[;]' '{print $1}')  #Enabled[E or D]
 	CONNECTION_NAME=$(echo $in | awk -F '[;]' '{print $2}')    #Name[string]
@@ -90,7 +84,7 @@ if [[ $(echo $in | awk -F '[ ]' '{print $1}') != "#" ]]; then
 	L_LOCAL_FWDHOST=$(echo $in | awk -F '[;]' '{print $13}')   #Server Local Host[string]
 	L_LOCAL_FWDPORT=$(echo $in | awk -F '[;]' '{print $14}')   #Server Local Port[int]
 	L_REMOTE_FWDPUB=$(echo $in | awk -F '[;]' '{print $15}')   #Public or Local[P or L]
-
+	# Read Value in Memory if "^"
 	if [ ${L_REMOTE_HOST}   != "^" ]; then REMOTE_HOST=${L_REMOTE_HOST};     fi
 	if [ ${L_REMOTE_PORT}   != "^" ]; then REMOTE_PORT=${L_REMOTE_PORT};     fi
 	if [ ${L_REMOTE_USER}   != "^" ]; then REMOTE_USER=${L_REMOTE_USER};     fi
@@ -103,50 +97,35 @@ if [[ $(echo $in | awk -F '[ ]' '{print $1}') != "#" ]]; then
 	if [ ${L_LOCAL_FWDHOST} != "^" ]; then LOCAL_FWDHOST=${L_LOCAL_FWDHOST}; fi
 	if [ ${L_LOCAL_FWDPORT} != "^" ]; then LOCAL_FWDPORT=${L_LOCAL_FWDPORT}; fi
 	if [ ${L_REMOTE_FWDPUB} != "^" ]; then REMOTE_FWDPUB=${L_REMOTE_FWDPUB}; fi
-
+	# Option Selector
 	if [ ${REMOTE_FWDPUB} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -L"; fi
 	if [ ${REMOTE_SETUP} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -S"; fi
 	if [ ${LOCAL_OPEN} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -R"; fi
 	if [ ${REMOTE_KILL} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -K"; fi
-	
-	if [ ${RUN} -eq 1 ] && [ ${CONNECTION_STATUS} = "e" ]; then FORKER
-	elif [ ${RUN} -eq 2 ] && [ ${CONNECTION_STATUS} = "e" ] && [ ${CONNECTION_NAME} = "${REQ_CONNECTION_NAME}" ]; then FORKER
-	elif [ ${RUN} -eq 3 ] && [ ${CONNECTION_STATUS} = "e" ]; then FORKER
-	elif [ ${RUN} -eq 4 ] && [ ${CONNECTION_NAME} = "${REQ_CONNECTION_NAME}" ]; then FORKER; fi
+	# Run Selector
+	if [ ${1} -eq 1 ] && [ ${CONNECTION_STATUS} = "e" ]; then FORKER ${1}
+	elif [ ${1} -eq 1 ] && [ ${#} -eq 2 ] && [ ${CONNECTION_STATUS} = "e" ] && [ ${CONNECTION_NAME} = "${2}" ]; then FORKER ${1}
+	elif [ ${1} -eq 2 ] && [ ${CONNECTION_STATUS} = "e" ]; then FORKER ${1}
+	elif [ ${1} -eq 2 ] && [ ${#} -eq 2 ] && [ ${CONNECTION_NAME} = "${2}" ]; then FORKER ${1}; fi
 fi
 done < $PORT_LIST
 }
-# PARSE INPUT ##########################################################################################################
+# MAIN RUNTIME #########################################################################################################
+echo "= LANTIS Router 3 - Academy City Research ========="
+echo "[---------][$(date)][ OK ] System Ready"
 if [ $# -lt 1 ]; then USAGE; exit 0; fi
-RUN=0; DRY=0; REQ_CONNECTION_NAME=""; PORT_LIST="./ports.lantis.csv"
+DRY=0; PORT_LIST="./ports.lantis.csv"; LOG_FILE="./lantis.log"; TIME_LAUNCH_PAUSE=4; TIME_DROP_PAUSE=2
+source ./lantis.config
 while getopts "Ll:Kk:C:XZ" opt; do 
   case $opt in
-	L) RUN=1;;
-	l) RUN=2; REQ_CONNECTION_NAME=${OPTARG};;
-	K) RUN=3;;
-	k) RUN=4; REQ_CONNECTION_NAME=${OPTARG};;
+	L) HEADER; WATCHDOG 1;;
+	l) WATCHDOG 1 ${OPTARG};;
+	K) HEADER; WATCHDOG 2;;
+	k) WATCHDOG 2 ${OPTARG};;
 	C) PORT_LIST="${OPTARG}";;
 	X) DRY=1;;
-    Z) SETUPGUIDE
-		exit;;
+    Z) HEADER; SETUPGUIDE; exit 0;;
     \?) echo "[PEBKAC] WTF is -$OPTARG?, thats not a accepted option, Abort"; USAGE; exit 1;;
     :) echo "[PEBKAC] -$OPTARG requires an argument, Abort"; USAGE; exit 1;;
   esac
 done
-# POST VAR #############################################################################################################
-LOG_FILE="./lantis.log"; TIME_LAUNCH_PAUSE=4; TIME_DROP_PAUSE=2
-source ./lantis.config
-# MAIN RUNTIME #########################################################################################################
-cat << EOF
-     __    ___    _   _________________
-    / /   /   |  / | / /_  __/  _/ ___/
-   / /   / /| | /  |/ / / /  / / \__ \ 
-  / /___/ ___ |/ /|  / / / _/ / ___/ / 
- /_____/_/  |_/_/ |_/ /_/ /___//____/  
- Lain Anonymous NetworkIng System
- by : Academy City Research
-
-EOF
-echo "= LANTIS Router 3 - Academy City Research ========="
-echo "[---------][$(date)][ OK ] System Ready"
-WATCHDOG

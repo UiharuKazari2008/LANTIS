@@ -40,42 +40,29 @@ TEST_CONN_FAILED () {
 echo "[${CONNECTION_NAME}][$(date)][ERR!] Connection was lost!"
 sleep ${TIME_FAILED_CONN}
 }
-CONNECT_HOST () {
+LINK () {
 if [ ${LOCAL_OPEN} -eq 0 ]; then # Use Reverse SSH Tunneling
 	REMOTE_PFWD="-R ${LOCAL_PORT}:127.0.0.1:22"; LOCAL_IP="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date)][INFO] Reverse Conection will be used"
 elif [ ${LOCAL_OPEN} -eq 1 ]; then # Use Direct Connection
-	REMOTE_PFWD="";	if [ ${LOCAL_IP} = "~" ]; then LOCAL_IP="$(curl ipinfo.io/ip 2> /dev/null)"; fi
-fi
+	REMOTE_PFWD="";	if [ ${LOCAL_IP} = "~" ]; then LOCAL_IP="$(curl ipinfo.io/ip 2> /dev/null)"; fi; fi
 echo "[${CONNECTION_NAME}][$(date)][INFO][>>>] Establishing Control..." 
 if [ ${DRY} -eq 1 ]; then echo "${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} <<"; fi
 ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} << EOF
-	if [ ${REMOTE_KILL} -eq 1 ]; then echo "[${CONNECTION_NAME}][$(date)][INFO][<<<] Sanitizing End-Point..."
-		netstat -tlpn | grep ":${REMOTE_FWDPORT} " | sed -n 's@.* \([0-9]*\)/${CMD_SSH}.*@kill \1@p' | sh > /dev/null
-	fi
-	echo "[${CONNECTION_NAME}][$(date)][INFO][<<<] Linked!"; pkill -f "^${CMD_SSH}.*${LOCAL_PFWD}$" > /dev/null
-	if [ ${DRY} -eq 1 ]; then echo "${CMD_SSH} ${LOCAL_IP} -l ${LOCAL_USER} -p ${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT} ${REMOTE_PORTPUB}${LOCAL_PFWD}"
-	else ${CMD_SSH} ${LOCAL_IP} -l ${LOCAL_USER} -p ${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} -L ${LOCAL_PFWD}; fi
-	echo "[${CONNECTION_NAME}][$(date)][ERR!][<<<] ETOL"
-EOF
-if [ ${DRY} -eq 1 ]; then exit 0; fi
-}
-KILL_HOST() {
-if [ ${LOCAL_OPEN} -eq 0 ]; then # Use Reverse SSH Tunneling
-	REMOTE_PFWD="-R ${LOCAL_PORT}:127.0.0.1:22"; LOCAL_IP="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date)][INFO] Reverse Conection will be used"
-elif [ ${LOCAL_OPEN} -eq 1 ]; then # Use Direct Connection
-	REMOTE_PFWD="";	if [ ${LOCAL_IP} = "~" ]; then LOCAL_IP="$(curl ipinfo.io/ip 2> /dev/null)"; fi
-fi
-echo "[${CONNECTION_NAME}][$(date)][INFO][>>>] Establishing Control..." 
-if [ ${DRY} -eq 1 ]; then echo "${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} <<"; fi
-${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} << EOF
-	echo "[${CONNECTION_NAME}][$(date)][INFO][<<<] Dropping...!"
-	if [ ${DRY} -eq 1 ]; then echo "pkill -f "^${CMD_SSH}.*${LOCAL_PFWD}$" > /dev/null"; else pkill -f "^${CMD_SSH}.*${LOCAL_PFWD}$" > /dev/null; fi
+	if [ ${1} = 1 ]; then
+		if [ ${REMOTE_KILL} -eq 1 ]; then netstat -tlpn | grep ":${REMOTE_FWDPORT} " | sed -n 's@.* \([0-9]*\)/.*@kill \1@p' | sh > /dev/null; fi
+		echo "[${CONNECTION_NAME}][$(date)][INFO][<<<] Linked!"; pkill -f "^${CMD_SSH}.*${LOCAL_PFWD}$" > /dev/null
+		if [ ${DRY} -eq 1 ]; then echo "${LOCAL_USER}@${LOCAL_IP}:${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} -L ${LOCAL_PFWD}"
+		else ${CMD_SSH} ${LOCAL_IP} -l ${LOCAL_USER} -p ${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} -L ${LOCAL_PFWD}; fi
+		echo "[${CONNECTION_NAME}][$(date)][ERR!][<<<] ETOL"
+	elif [ ${1} = 2 ]; then
+		echo "[${CONNECTION_NAME}][$(date)][INFO][<<<] Dropping...!"
+		if [ ${DRY} -eq 1 ]; then pgrep -f "^${CMD_SSH}.*${LOCAL_PFWD}$"; else pkill -f "^${CMD_SSH}.*${LOCAL_PFWD}$" > /dev/null; fi; fi
 EOF
 if [ ${DRY} -eq 1 ]; then exit 0; fi
 }
 # PARSE INPUT ##########################################################################################################
 if [ $# -lt 1 ]; then echo "No Data"; exit 1; fi
-REMOTE_PORTPUB=""; DRY=0; LOCAL_OPEN=1; REMOTE_KILL=0; REMOTE_SETUP=0
+REMOTE_PORTPUB=""; DRY=0; LOCAL_OPEN=1; REMOTE_KILL=0; REMOTE_SETUP=0; LOOPCON=1;
 while getopts "m:n:h:p:u:H:P:U:D:t:T:LSRKX" opt; do 
   case $opt in
   	m) OPER_MODE=${OPTARG};;
@@ -106,18 +93,10 @@ LOCAL_OPT="-N -o CompressionLevel=9 -o ExitOnForwardFailure=yes"; LOCAL_PFWD="${
 source ./watchdog.lantis.config
 # MAIN RUNTIME #########################################################################################################
 echo "[${CONNECTION_NAME}][$(date)][INFO] DATA LOADED"
-if  [ ${OPER_MODE} -eq 1 ]; then while [ $# -gt 9 ]; do
+while [ ${LOOPCON} -eq 1 ]; do
 		if TEST_INET_VERIFY; then TEST_INET_PASSED
 			{ TEST_HOST_VERIFY 
-			} || { 
-			TEST_HOST_FAILED 
-			}; CONNECT_HOST
+			} || { TEST_HOST_FAILED 
+			}; LINK ${OPER_MODE}; if [ ${OPER_MODE} -eq 2 ]; then LOOPCON=0; fi
 		else TEST_INET_FAILED; fi; TEST_CONN_FAILED
 	done
-elif  [ ${OPER_MODE} -eq 2 ]; then REMOTE_SETUP=0; if TEST_INET_VERIFY; then TEST_INET_PASSED
-		{ TEST_HOST_VERIFY 
-		} || { 
-		TEST_HOST_FAILED
-		}; KILL_HOST
-	else TEST_INET_FAILED; fi; TEST_CONN_FAILED
-fi
