@@ -90,7 +90,7 @@ sleep ${}
 }
 WATCHDOG_GEN() {
 while read in; do
-if [[ $in != "#*" ]]; then
+if [[ $(echo $in | awk -F '[ ]' '{print $1}') != "#" ]]; then
 	# Enable or Disabled;Name;Remote Host;R Port;R User;Local Host [~ uses current public ip];L Port;L User;Setup [y or n];Bypass NAT [y or n];Kill Current Port [y or n];Public Port;Server Host;Server Port;Public or Local [p or l]
 	SKIP=0; EXTRA_OPT=""; 
 	CONNECTION_STATUS=$(echo $in | awk -F '[;]' '{print $1}')  #Enabled[E or D]
@@ -135,7 +135,7 @@ done < $PORT_LIST
 }
 WATCHDOG_DROP() {
 while read in; do
-if [[ $in != "#*" ]]; then 
+if [[ $(echo $in | awk -F '[ ]' '{print $1}') != "#" ]]; then
 	# e;test;remote.com;22;root;127.0.0.1;22;root;n;y;y;8989;192.168.0.2;8894;p
 	SKIP=0; EXTRA_OPT=""; 
 	CONNECTION_STATUS=$(echo $in | awk -F '[;]' '{print $1}')  #Enabled[E or D]
