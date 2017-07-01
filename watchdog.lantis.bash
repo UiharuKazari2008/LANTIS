@@ -123,18 +123,16 @@ if  [ ${OPER_MODE} -eq 1 ]; then
 		TEST_CONN_FAILED
 	done
 elif  [ ${OPER_MODE} -eq 2 ]; then
-	while [ $# -gt 9 ]; do
-		TEST_INET_VERIFY; if [ $? -eq 0 ]; then
-			TEST_INET_PASSED
-			{ 
-			TEST_HOST_VERIFY 
-			} || { 
-			TEST_HOST_FAILED 
-			}
-			SELECT_REVERSE; KILL_HOST
-		else
-			TEST_INET_FAILED
-		fi
-		TEST_CONN_FAILED
-	done
+	TEST_INET_VERIFY; if [ $? -eq 0 ]; then
+		TEST_INET_PASSED
+		{ 
+		TEST_HOST_VERIFY 
+		} || { 
+		TEST_HOST_FAILED 
+		}
+		SELECT_REVERSE; KILL_HOST
+	else
+		TEST_INET_FAILED
+	fi
+	TEST_CONN_FAILED
 fi
