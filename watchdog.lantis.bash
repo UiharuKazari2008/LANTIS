@@ -72,7 +72,7 @@ if [ ${DRY} -eq 1 ]; then exit 0; fi
 }
 # PARSE INPUT ##########################################################################################################
 if [ $# -lt 1 ]; then echo "No Data"; exit 1; fi
-REMOTE_PORTPUB=""; DRY=0; LOCAL_OPEN=1; REMOTE_KILL=0
+REMOTE_PORTPUB=""; DRY=0; LOCAL_OPEN=1; REMOTE_KILL=0; REMOTE_SETUP=0
 while getopts "m:n:h:p:u:H:P:U:D:t:T:LSRKX" opt; do 
   case $opt in
   	m) OPER_MODE=${OPTARG};;
