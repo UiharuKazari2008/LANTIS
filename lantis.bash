@@ -103,9 +103,9 @@ if [[ $(echo $in | awk -F '[ ]' '{print $1}') != "#" ]]; then
 	if [ ${LOCAL_OPEN} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -R"; fi
 	if [ ${REMOTE_KILL} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -K"; fi
 	# Run Selector
-	if [ ${1} -eq 1 ] && [ ${CONNECTION_STATUS} = "e" ]; then FORKER ${1}
+	if   [ ${1} -eq 1 ] && [ ${#} -eq 1 ] && [ ${CONNECTION_STATUS} = "e" ]; then FORKER ${1}
 	elif [ ${1} -eq 1 ] && [ ${#} -eq 2 ] && [ ${CONNECTION_STATUS} = "e" ] && [ ${CONNECTION_NAME} = "${2}" ]; then FORKER ${1}
-	elif [ ${1} -eq 2 ] && [ ${CONNECTION_STATUS} = "e" ]; then FORKER ${1}
+	elif [ ${1} -eq 2 ] && [ ${#} -eq 1 ] && [ ${CONNECTION_STATUS} = "e" ]; then FORKER ${1}
 	elif [ ${1} -eq 2 ] && [ ${#} -eq 2 ] && [ ${CONNECTION_NAME} = "${2}" ]; then FORKER ${1}; fi
 fi
 done < $PORT_LIST
