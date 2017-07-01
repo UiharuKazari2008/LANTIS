@@ -192,11 +192,14 @@ RUN=0; DRY=0; REQ_CONNECTION_NAME=""; PORT_LIST="./ports.lantis.csv"
 while getopts "RrKkXZ" opt; do 
   case $opt in
 	R) RUN=1;;
-	r) RUN=2; REQ_CONNECTION_NAME=${OPTARG};;
+	r) RUN=2
+		REQ_CONNECTION_NAME=${OPTARG};;
 	K) RUN=3;;
-	k) RUN=4; REQ_CONNECTION_NAME=${OPTARG};;
+	k) RUN=4
+		REQ_CONNECTION_NAME=${OPTARG};;
 	X) DRY=1;;
-    Z) SETUPGUIDE; exit;;
+    Z) SETUPGUIDE
+		exit;;
     \?) echo "[PEBKAC] WTF is -$OPTARG?, thats not a accepted option, Abort"; USAGE; exit 1;;
     :) echo "[PEBKAC] -$OPTARG requires an argument, Abort"; USAGE; exit 1;;
   esac
