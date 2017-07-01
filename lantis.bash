@@ -189,7 +189,7 @@ done < $PORT_LIST
 # PARSE INPUT ##########################################################################################################
 if [ $# -lt 1 ]; then USAGE; exit 0; fi
 RUN=0; DRY=0; REQ_CONNECTION_NAME=""; PORT_LIST="./ports.lantis.csv"
-while getopts "RrKkXZ" opt; do 
+while getopts "Rr:Kk:XZ" opt; do 
   case $opt in
 	R) RUN=1;;
 	r) RUN=2
