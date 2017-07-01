@@ -1,21 +1,12 @@
 # LANTIS EasyLink Router 2 - Router Table
 # You can use "^" to read last value and save time
-# NOTE: There is little input verification, make sure you know what your doing
+# NOTE: There is little input verification, make sure you know what your doing, You cannot use the same local port when using bypass nat, Disabled connections are still read
 # Enable or Disale Connection [e,d]; Connection Name [string.no spaces]; Remote Host/IP; Remote Port; Remote User; Local User [~ for dynamic ip]; Local Port; Local User;
 # Setup End Point [y or n]; Bypass NAT [y or n]; Hijack Port [y or n]; Public Port; Server Host; Server Port; Public or Local [p or l]
-e;admin-1;104.236.243.143;22;root;~;65500;root;0;0;0;5998;192.168.0.50;3389;1;
-e;admin-2;^;^;^;^;^;^;^;^;^;5999;192.168.0.47;22;^;
-d;admin-3;^;^;^;^;^;^;^;^;^;10022;192.168.0.47;^;^;
-e;armyofwar-1;^;^;^;^;^;^;^;^;^;5001;172.16.0.65;3389;^;
-e;kazari-1;^;^;^;^;^;^;^;^;^;5010;192.168.100.30;^;^;
-e;neo-1;^;^;^;^;^;^;^;^;^;5002;172.16.0.66;^;^;
-d;unknown-1;^;^;^;^;^;^;^;^;^;5003;192.168.0.134;^;^;
-e;kira-1;^;^;^;^;^;^;^;^;^;5005;172.16.0.33;^;^;
-e;euk-1;^;^;^;^;^;^;^;^;^;5006;172.16.0.68;^;^;
-e;nev-1;^;^;^;^;^;^;^;^;^;8001;172.16.0.97;^;^;
-e;nev-2;^;^;^;^;^;^;^;^;^;5006;172.16.0.99;4489;^;
-e;nev-3;^;^;^;^;^;^;^;^;^;8002;172.16.0.119;27015;^;
-e;nev-4;^;^;^;^;^;^;^;^;^;8003;172.16.0.119;22;^;
-e;kat-1;^;^;^;^;^;^;^;^;^;5013;172.16.20.9;^;^;
-e;issei-1;^;^;^;^;^;^;^;^;^;5008;172.16.0.129;3389;^;
-e;tehknet-1;^;^;^;^;^;^;^;^;^;5015;172.16.20.25;^;^;
+e;rdp-1;remote.com;22;root;~;22;root;0;0;0;5050;192.168.1.1;3389;1;
+e;rdp-2;^;^;^;^;^;^;^;^;^;5051;192.168.1.2;^;^;
+e;ssh-1;^;^;^;^;^;^;^;^;^;5052;^;22;^;
+e;web-1;fractal.ca;^;^;^;^;^;^;^;^;80;192.168.0.3;80;^;
+e;web-2;^;^;^;^;^;^;^;^;^;443;^;443;^;
+d;ssh-2;officespace.com;^;^;127.0.0.1;65500;^;^;1;^;9090;192.168.0.4;22;^;
+e;ssh-4;^;^;^;^;65501;^;^;^;^;9091;192.168.0.5;^;^;
