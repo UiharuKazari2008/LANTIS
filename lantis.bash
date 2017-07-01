@@ -50,13 +50,8 @@ cat << EOF
  2) Add id_rsa.pub to /root /.ssh/authorized_keys on the remote server
  3) Generate a SSH key for LANTIS in your current directory where the script will stay
       [root@local]~/LANTIS ssh-keygen –b 4096 –f lantis.key
- 4) Run this script with –S to auto-setup the remote server and any other options you need like -R
-      [root@local]~/LANTIS lantis.bash –h 123.45.67.89 –S 
+ 4) Add the entry to the port list with the setup bit set to 1, run that connection
  5) You should be fine as long as your destination host allows your default ssh key
- 6) Normaly use:
-      [root@local]~/LANTIS nohup bash lantis.bash –h 123.45.67.89
-      nohup: ignoring input and appending output to ‘nohup.out’
-      [root@local]~/LANTIS tail nohup.out
 
 EOF
 }
