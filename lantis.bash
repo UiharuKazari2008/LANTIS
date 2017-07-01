@@ -83,7 +83,7 @@ if [ ${DRY} -eq 1 ]; then
 else 
 	pkill -f "bash ./watchdog.lantis.bash -n ${CONNECTION_NAME}*" > /dev/null
 	nohup bash ./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
-	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT} -m 1 & 
+	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT} -m 1 &> ${LOG_FILE} & 
 fi
 sleep 7
 }
@@ -97,7 +97,7 @@ if [ ${DRY} -eq 1 ]; then
 else 
 	pkill -f "bash ./watchdog.lantis.bash -n ${CONNECTION_NAME}*" > /dev/null
 	nohup bash ./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
-	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT} -m 2 & 
+	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT} -m 2 &> ${LOG_FILE} &
 fi
 sleep 7
 }
@@ -188,7 +188,7 @@ done < $PORT_LIST
 }
 # PARSE INPUT ##########################################################################################################
 if [ $# -lt 1 ]; then USAGE; exit 0; fi
-RUN=0; DRY=0; REQ_CONNECTION_NAME=""; PORT_LIST="./ports.lantis.csv"
+RUN=0; DRY=0; REQ_CONNECTION_NAME=""
 while getopts "Rr:Kk:XZ" opt; do 
   case $opt in
 	R) RUN=1;;
@@ -205,7 +205,7 @@ while getopts "Rr:Kk:XZ" opt; do
   esac
 done
 # POST VAR #############################################################################################################
-
+PORT_LIST="./ports.lantis.csv"; LOG_FILE="./lantis.log"
 # MAIN RUNTIME #########################################################################################################
 cat << EOF
      __    ___    _   _________________
