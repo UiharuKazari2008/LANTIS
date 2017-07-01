@@ -1,5 +1,8 @@
-# Enable or Disabled;Name;Remote Host;R Port;R User;Local Host [~ uses current public ip];L Port;L User;Setup [y or n];Bypass NAT [y or n];Kill Current Port [y or n];Public Port;Server Host;Server Port;Public or Local [p or l]
-# 
+# LANTIS EasyLink Router 2 - Router Table
+# You can use "^" to read last value and save time
+# NOTE: There is little input verification, make sure you know what your doing
+# Enable or Disale Connection [e,d]; Connection Name [string.no spaces]; Remote Host/IP; Remote Port; Remote User; Local User [~ for dynamic ip]; Local Port; Local User;
+# Setup End Point [y or n]; Bypass NAT [y or n]; Hijack Port [y or n]; Public Port; Server Host; Server Port; Public or Local [p or l]
 e;admin-1;104.236.243.143;22;root;~;65500;root;0;0;0;5998;192.168.0.50;3389;1;
 e;admin-2;^;^;^;^;^;^;^;^;^;5999;192.168.0.47;22;^;
 d;admin-3;^;^;^;^;^;^;^;^;^;10022;192.168.0.47;^;^;
