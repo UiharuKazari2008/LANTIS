@@ -116,14 +116,14 @@ echo "[---------][$(date)][ OK ] System Ready"
 if [ $# -lt 1 ]; then USAGE; exit 0; fi
 DRY=0; PORT_LIST="./ports.lantis.csv"; LOG_FILE="./lantis.log"; TIME_LAUNCH_PAUSE=4; TIME_DROP_PAUSE=2
 source ./lantis.config
-while getopts "Ll:Kk:C:XZ" opt; do 
+while getopts "C:XLl:Kk:Z" opt; do 
   case $opt in
+  	C) PORT_LIST="${OPTARG}";;
+	X) DRY=1;;
 	L) HEADER; WATCHDOG 1;;
 	l) WATCHDOG 1 ${OPTARG};;
 	K) HEADER; WATCHDOG 2;;
 	k) WATCHDOG 2 ${OPTARG};;
-	C) PORT_LIST="${OPTARG}";;
-	X) DRY=1;;
     Z) HEADER; SETUPGUIDE; exit 0;;
     \?) echo "[PEBKAC] WTF is -$OPTARG?, thats not a accepted option, Abort"; USAGE; exit 1;;
     :) echo "[PEBKAC] -$OPTARG requires an argument, Abort"; USAGE; exit 1;;
