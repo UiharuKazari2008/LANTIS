@@ -4,7 +4,7 @@
 if [ $# -lt 1 ]; then echo "No Data"; exit 1; fi
 REMOTE_PORTPUB=""; DRY=0; LOCAL_OPEN=1; REMOTE_KILL=0
 # Parse Options
-while getopts "n:h:p:u:H:P:U:D:t:T:LSRKX" opt; do 
+while getopts "n:h:p:u:H:P:U:D:t:T:LSRKXm:" opt; do 
   case $opt in
 	n) CONNECTION_NAME=${OPTARG};;
 	h) REMOTE_HOST=${OPTARG};;
@@ -20,6 +20,7 @@ while getopts "n:h:p:u:H:P:U:D:t:T:LSRKX" opt; do
 	S) REMOTE_SETUP=1;;
 	R) LOCAL_OPEN=0;;
 	K) REMOTE_KILL=1;;
+	m) OPER_MODE=${OPTARG};;
 	X) DRY=1;;
     \?) echo "[PEBKAC] WTF is -$OPTARG?, thats not a accepted option, Abort"; USAGE; exit 1;;
     :) echo "[PEBKAC] -$OPTARG requires an argument, Abort"; USAGE; exit 1;;
@@ -35,22 +36,14 @@ LOCAL_PFWD="${REMOTE_FWDPORT}:${LOCAL_FWDHOST}:${LOCAL_FWDPORT}"
 
 ########################################################################################################################
 
-
-########################################################################################################################
-
-
-while [ $# -gt 9 ]; do # Main Loop ##################################################################
-wget -q --spider https://google.com --timeout=15
-if [ $? -eq 0 ]; then # CHECK - Internet Verification ###################################
-echo "[${CONNECTION_NAME}][$(date)][INFO] Outbound Internet Connection:  Passed"
-# CHECK - Host Verification #############################################################
-{ ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} << EOF
-echo "[${CONNECTION_NAME}][$(date)][INFO] Outbound End-Point:            Passed"
+TEST_HOST_VERIFY () { 
+ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} << EOF
+echo "[${CONNECTION_NAME}][$(date)][INFO] Outbound End-Point:           OK"
 EOF
-} || { 
-# FAULT - Host Verification #############################################################
-echo "[${CONNECTION_NAME}][$(date)][ERR!] Outbound End-Point:            No Shell Access/Failed"
-if [ ${REMOTE_SETUP} -eq 1 ]; then # Setup Server #######################################
+}
+TEST_HOST_FAILED () { 
+echo "[${CONNECTION_NAME}][$(date)][ERR!] Outbound End-Point:    No Access"
+if [ ${REMOTE_SETUP} -eq 1 ]; then
 	echo "[${CONNECTION_NAME}][$(date)][INFO] Passing Key to End-Point..."
 	scp ${COMMON_OPT} -o Port=${REMOTE_PORT} ${KEY} ${REMOTE_USER}@${REMOTE_HOST}:${KEY}
 	ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ~/.ssh/id_rsa ${COMMON_OPT} << EOF
@@ -65,14 +58,29 @@ EOF
 EOF
 	fi
 	echo "[${CONNECTION_NAME}][$(date)][INFO] Key Exchange Complete"
-fi # Setup Server #######################################################################
-} # END - Host Verification #############################################################
+fi
+}
+TEST_INET_VERIFY () {
+wget -q --spider https://google.com --timeout=15
+}
+TEST_INET_PASSED () {
+echo "[${CONNECTION_NAME}][$(date)][INFO] Outbound Internet Connection: OK"
+}
+TEST_INET_FAILED () {
+echo "[${CONNECTION_NAME}][$(date)][ERR!] Outbound Internet Connection: Failed"
+}
+TEST_CONN_FAILED () {
+echo "[${CONNECTION_NAME}][$(date)][ERR!] Connection was lost!"
+sleep 2
+}
+SELECT_REVERSE () {
 if [ ${LOCAL_OPEN} -eq 0 ]; then # Use Reverse SSH Tunneling
 	REMOTE_PFWD="-R ${LOCAL_PORT}:127.0.0.1:22"; LOCAL_IP="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date)][INFO] Reverse Conection will be used"
 elif [ ${LOCAL_OPEN} -eq 1 ]; then # Use Direct Connection
 	REMOTE_PFWD="";	if [ ${LOCAL_IP} = "~" ]; then LOCAL_IP="$(curl ipinfo.io/ip 2> /dev/null)"; fi
 fi
-#Start Stage 2 and Connect Back
+}
+CONNECT_HOST () {
 echo "[${CONNECTION_NAME}][$(date)][INFO][>>>] Establishing Control..." 
 if [ ${DRY} -eq 1 ]; then echo "ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} <<"; fi
 ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} << EOF
@@ -87,9 +95,46 @@ ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} $
 	echo "[${CONNECTION_NAME}][$(date)][ERR!][<<<] ETOL"
 EOF
 if [ ${DRY} -eq 1 ]; then exit 0; fi
-else # ELSE - Internet Verification #####################################################
-echo "[${CONNECTION_NAME}][$(date)][ERR!] Outbound Internet Connection:  Failed"
-fi # END - Internet Verification ########################################################
-echo "[${CONNECTION_NAME}][$(date)][ERR!] Connection was lost!"
-sleep 2
-done # Main Loop ######################################################################################################
+}
+KILL_HOST() {
+echo "[${CONNECTION_NAME}][$(date)][INFO][>>>] Establishing Control..." 
+if [ ${DRY} -eq 1 ]; then echo "ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} <<"; fi
+ssh ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} << EOF
+	echo "[${CONNECTION_NAME}][$(date)][INFO][<<<] Dropping...!"
+	if [ ${DRY} -eq 1 ]; then echo "pkill -f "^ssh.*${LOCAL_PFWD}$" > /dev/null"; else pkill -f "^ssh.*${LOCAL_PFWD}$" > /dev/null; fi
+EOF
+if [ ${DRY} -eq 1 ]; then exit 0; fi
+}
+########################################################################################################################
+
+if  [ ${OPER_MODE} -eq 1 ]; then
+	while [ $# -gt 9 ]; do
+		TEST_INET_VERIFY; if [ $? -eq 0 ]; then
+			TEST_INET_PASSED
+			{ 
+			TEST_HOST_VERIFY 
+			} || { 
+			TEST_HOST_FAILED 
+			}
+			SELECT_REVERSE; CONNECT_HOST
+		else
+			TEST_INET_FAILED
+		fi
+		TEST_CONN_FAILED
+	done
+elif  [ ${OPER_MODE} -eq 2 ]; then
+	while [ $# -gt 9 ]; do
+		TEST_INET_VERIFY; if [ $? -eq 0 ]; then
+			TEST_INET_PASSED
+			{ 
+			TEST_HOST_VERIFY 
+			} || { 
+			TEST_HOST_FAILED 
+			}
+			SELECT_REVERSE; KILL_HOST
+		else
+			TEST_INET_FAILED
+		fi
+		TEST_CONN_FAILED
+	done
+fi
