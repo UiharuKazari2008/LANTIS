@@ -75,8 +75,7 @@ EOF
 }
 DATA_PARSER () {
 # e;test;remote.com;22;root;127.0.0.1;22;root;n;y;y;8989;192.168.0.2;8894;p
-SKIP=0; EXTRA_OPT=""; CONNECTION_STATUS=""; CONNECTION_NAME=""; REMOTE_HOST=""; REMOTE_PORT=""; REMOTE_USER=""; LOCAL_HOST=""; LOCAL_PORT=""; 
-LOCAL_USER=""; REMOTE_SETUP=""; LOCAL_OPEN=""; REMOTE_KILL=""; LOCAL_FWDHOST=""; LOCAL_FWDPORT=""; REMOTE_FWDPORT=""; REMOTE_FWDPUB="";
+SKIP=0; EXTRA_OPT=""; 
 CONNECTION_STATUS=$(echo $in | awk -F '[;]' '{print $1}')  #Enabled[E or D]
 CONNECTION_NAME=$(echo $in | awk -F '[;]' '{print $2}')    #Name[string]
 L_REMOTE_HOST=$(echo $in | awk -F '[;]' '{print $3}')      #Remote Host[string]
@@ -106,10 +105,10 @@ if [ ${L_LOCAL_FWDHOST} != "^" ]; then LOCAL_FWDHOST=${L_LOCAL_FWDHOST}; fi
 if [ ${L_LOCAL_FWDPORT} != "^" ]; then LOCAL_FWDPORT=${L_LOCAL_FWDPORT}; fi
 if [ ${L_REMOTE_FWDPUB} != "^" ]; then REMOTE_FWDPUB=${L_REMOTE_FWDPUB}; fi
 
-if [ ${REMOTE_FWDPUB} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -L"; fi
-if [ ${REMOTE_SETUP} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -S"; fi
-if [ ${LOCAL_OPEN} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -R"; fi
-if [ ${REMOTE_KILL} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -K"; fi
+#if [ ${REMOTE_FWDPUB} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -L"; fi
+#if [ ${REMOTE_SETUP} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -S"; fi
+#if [ ${LOCAL_OPEN} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -R"; fi
+#if [ ${REMOTE_KILL} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -K"; fi
 }
 FORKER_LAUNCH () {
 echo "[${CONNECTION_NAME}][$(date)][INFO] Launching..."
