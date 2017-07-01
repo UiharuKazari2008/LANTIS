@@ -41,6 +41,11 @@ echo "[${CONNECTION_NAME}][$(date)][ERR!] Connection was lost!"
 sleep ${TIME_FAILED_CONN}
 }
 CONNECT_HOST () {
+if [ ${LOCAL_OPEN} -eq 0 ]; then # Use Reverse SSH Tunneling
+	REMOTE_PFWD="-R ${LOCAL_PORT}:127.0.0.1:22"; LOCAL_IP="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date)][INFO] Reverse Conection will be used"
+elif [ ${LOCAL_OPEN} -eq 1 ]; then # Use Direct Connection
+	REMOTE_PFWD="";	if [ ${LOCAL_IP} = "~" ]; then LOCAL_IP="$(curl ipinfo.io/ip 2> /dev/null)"; fi
+fi
 echo "[${CONNECTION_NAME}][$(date)][INFO][>>>] Establishing Control..." 
 if [ ${DRY} -eq 1 ]; then echo "${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} <<"; fi
 ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} << EOF
@@ -55,6 +60,11 @@ EOF
 if [ ${DRY} -eq 1 ]; then exit 0; fi
 }
 KILL_HOST() {
+if [ ${LOCAL_OPEN} -eq 0 ]; then # Use Reverse SSH Tunneling
+	REMOTE_PFWD="-R ${LOCAL_PORT}:127.0.0.1:22"; LOCAL_IP="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date)][INFO] Reverse Conection will be used"
+elif [ ${LOCAL_OPEN} -eq 1 ]; then # Use Direct Connection
+	REMOTE_PFWD="";	if [ ${LOCAL_IP} = "~" ]; then LOCAL_IP="$(curl ipinfo.io/ip 2> /dev/null)"; fi
+fi
 echo "[${CONNECTION_NAME}][$(date)][INFO][>>>] Establishing Control..." 
 if [ ${DRY} -eq 1 ]; then echo "${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} <<"; fi
 ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} << EOF
@@ -93,6 +103,7 @@ TIME_FAILED_CONN=2; TIME_FAILED_INET=5; TIMEOUT_VERIFY_INET=15; HOST_VERIFY="htt
 CMD_SSH="ssh"; CMD_SCP="scp"; KEY=lantis.key; SETUP_KEY="$HOME/.ssh/id_rsa"
 COMMON_OPT="-C -2 -o BatchMode=yes -o StrictHostKeyChecking=no -o TCPKeepAlive=yes -o ServerAliveInterval=5 -o ConnectTimeout=15 -o LogLevel=Error"
 LOCAL_OPT="-N -o CompressionLevel=9 -o ExitOnForwardFailure=yes"; LOCAL_PFWD="${REMOTE_FWDPORT}:${LOCAL_FWDHOST}:${LOCAL_FWDPORT}"
+source ./watchdog.lantis.config
 # MAIN RUNTIME #########################################################################################################
 echo "[${CONNECTION_NAME}][$(date)][INFO] DATA LOADED"
 if  [ ${OPER_MODE} -eq 1 ]; then while [ $# -gt 9 ]; do
@@ -100,23 +111,13 @@ if  [ ${OPER_MODE} -eq 1 ]; then while [ $# -gt 9 ]; do
 			{ TEST_HOST_VERIFY 
 			} || { 
 			TEST_HOST_FAILED 
-			}
-			if [ ${LOCAL_OPEN} -eq 0 ]; then # Use Reverse SSH Tunneling
-				REMOTE_PFWD="-R ${LOCAL_PORT}:127.0.0.1:22"; LOCAL_IP="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date)][INFO] Reverse Conection will be used"
-			elif [ ${LOCAL_OPEN} -eq 1 ]; then # Use Direct Connection
-				REMOTE_PFWD="";	if [ ${LOCAL_IP} = "~" ]; then LOCAL_IP="$(curl ipinfo.io/ip 2> /dev/null)"; fi
-			fi; CONNECT_HOST
+			}; CONNECT_HOST
 		else TEST_INET_FAILED; fi; TEST_CONN_FAILED
 	done
 elif  [ ${OPER_MODE} -eq 2 ]; then REMOTE_SETUP=0; if TEST_INET_VERIFY; then TEST_INET_PASSED
 		{ TEST_HOST_VERIFY 
 		} || { 
 		TEST_HOST_FAILED
-		}
-		if [ ${LOCAL_OPEN} -eq 0 ]; then # Use Reverse SSH Tunneling
-			REMOTE_PFWD="-R ${LOCAL_PORT}:127.0.0.1:22"; LOCAL_IP="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date)][INFO] Reverse Conection will be used"
-		elif [ ${LOCAL_OPEN} -eq 1 ]; then # Use Direct Connection
-			REMOTE_PFWD="";	if [ ${LOCAL_IP} = "~" ]; then LOCAL_IP="$(curl ipinfo.io/ip 2> /dev/null)"; fi
-		fi; KILL_HOST
+		}; KILL_HOST
 	else TEST_INET_FAILED; fi; TEST_CONN_FAILED
 fi

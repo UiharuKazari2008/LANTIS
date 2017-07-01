@@ -14,32 +14,19 @@ cat << EOF
 	
  support : help.lantis.project@acr.moe
 
- Usage:
+ LANTIS EasyLink Router 2 - Usage:
 
  Run ===================================================================
- -r  Launch a Connecion
- -R  Launch ALL Connections
+ -l  Launch a Connecion
+ -L  Launch ALL Connections
  
  Drop ==================================================================
  -k  Drop a Connection
  -K  Drop ALL Connections
- 
- Local Host ============================================================
- -P  SSH Port (Default: 65500)
- -U  User to login as (Default: root)
-
- Router ================================================================
- -H  Local Server (Default: 127.0.0.1)
- -a  Public Port 1   -A Server Port 1 (Default: 80)
- -b  Public Port 2   -B Server Port 2 (Default: 443)
 
  Extra Options =========================================================
- -K  Key to use for both directions (Default: lantis.key + .pub)
- -R  Use Reverse SSH Tunneling to bypass inbound NAT requirements. 
-       Useful if you dont have access to the firewall or router.
- -K  Kill zombie SSH sessions to make way for this connection
- -S  Setup Remote Server
- -C  Source File to use
+ -C  Use another port list (Default: ./ports.lantis.csv)
+ -X  Dry Run (Does not do any action but test full connection)
  -Z  Display Setup Guide
 
 EOF
@@ -74,7 +61,7 @@ cat << EOF
 EOF
 }
 FORKER_LAUNCH () {
-echo "[${CONNECTION_NAME}][$(date)][INFO] Launching..."
+echo "[${CONNECTION_NAME}][$(date)][INFO] Launching Connection..."
 if [ ${DRY} -eq 1 ]; then 
 	echo ">>>> -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
 	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT}"
@@ -85,10 +72,10 @@ else
 	nohup bash ./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
 	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT} -m 1 &> ${LOG_FILE} & 
 fi
-sleep 7
+sleep ${TIME_LAUNCH_PAUSE}
 }
 FORKER_DROP () {
-echo "[${CONNECTION_NAME}][$(date)][INFO] Dropping Watchdog..."
+echo "[${CONNECTION_NAME}][$(date)][INFO] Dropping Connection..."
 if [ ${DRY} -eq 1 ]; then 
 	echo "./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
 	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT}"
@@ -99,11 +86,12 @@ else
 	nohup bash ./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
 	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT} -m 2 &> ${LOG_FILE} &
 fi
-sleep 7
+sleep ${}
 }
 WATCHDOG_GEN() {
 while read in; do
-	# e;test;remote.com;22;root;127.0.0.1;22;root;n;y;y;8989;192.168.0.2;8894;p
+if [[ $in != "#*" ]]; then
+	# Enable or Disabled;Name;Remote Host;R Port;R User;Local Host [~ uses current public ip];L Port;L User;Setup [y or n];Bypass NAT [y or n];Kill Current Port [y or n];Public Port;Server Host;Server Port;Public or Local [p or l]
 	SKIP=0; EXTRA_OPT=""; 
 	CONNECTION_STATUS=$(echo $in | awk -F '[;]' '{print $1}')  #Enabled[E or D]
 	CONNECTION_NAME=$(echo $in | awk -F '[;]' '{print $2}')    #Name[string]
@@ -142,10 +130,12 @@ while read in; do
 	if [ ${RUN} -eq 2 ] && [ ${CONNECTION_NAME} != "${REQ_CONNECTION_NAME}" ]; then SKIP=1; fi
 	if [ ${CONNECTION_STATUS} = "e" ] && [ ${SKIP} -eq 0 ]; then FORKER_LAUNCH	
 	elif [ ${CONNECTION_STATUS} = "d" ]; then echo "[${CONNECTION_NAME}][$(date)][ERR!] DISABLED"; fi
+fi
 done < $PORT_LIST
 }
 WATCHDOG_DROP() {
-while read in; do 
+while read in; do
+if [[ $in != "#*" ]]; then 
 	# e;test;remote.com;22;root;127.0.0.1;22;root;n;y;y;8989;192.168.0.2;8894;p
 	SKIP=0; EXTRA_OPT=""; 
 	CONNECTION_STATUS=$(echo $in | awk -F '[;]' '{print $1}')  #Enabled[E or D]
@@ -184,19 +174,19 @@ while read in; do
 	
 	if [ ${RUN} -eq 4 ] && [ ${CONNECTION_NAME} != "${REQ_CONNECTION_NAME}" ]; then SKIP=1; fi
 	if [ ${SKIP} -eq 0 ]; then FORKER_DROP; fi
+fi
 done < $PORT_LIST
 }
 # PARSE INPUT ##########################################################################################################
 if [ $# -lt 1 ]; then USAGE; exit 0; fi
-RUN=0; DRY=0; REQ_CONNECTION_NAME=""
-while getopts "Rr:Kk:XZ" opt; do 
+RUN=0; DRY=0; REQ_CONNECTION_NAME=""; PORT_LIST="./ports.lantis.csv"
+while getopts "Ll:Kk:C:XZ" opt; do 
   case $opt in
-	R) RUN=1;;
-	r) RUN=2
-		REQ_CONNECTION_NAME=${OPTARG};;
+	L) RUN=1;;
+	l) RUN=2; REQ_CONNECTION_NAME=${OPTARG};;
 	K) RUN=3;;
-	k) RUN=4
-		REQ_CONNECTION_NAME=${OPTARG};;
+	k) RUN=4; REQ_CONNECTION_NAME=${OPTARG};;
+	C) PORT_LIST="${OPTARG}";;
 	X) DRY=1;;
     Z) SETUPGUIDE
 		exit;;
@@ -205,7 +195,8 @@ while getopts "Rr:Kk:XZ" opt; do
   esac
 done
 # POST VAR #############################################################################################################
-PORT_LIST="./ports.lantis.csv"; LOG_FILE="./lantis.log"
+LOG_FILE="./lantis.log"; TIME_LAUNCH_PAUSE=4; TIME_DROP_PAUSE=2
+source ./lantis.config
 # MAIN RUNTIME #########################################################################################################
 cat << EOF
      __    ___    _   _________________
