@@ -75,7 +75,8 @@ EOF
 }
 DATA_PARSER () {
 # e;test;remote.com;22;root;127.0.0.1;22;root;n;y;y;8989;192.168.0.2;8894;p
-SKIP=0; EXTRA_OPT=""
+SKIP=0; EXTRA_OPT=""; CONNECTION_STATUS=""; CONNECTION_NAME=""; REMOTE_HOST=""; REMOTE_PORT=""; REMOTE_USER=""; LOCAL_HOST=""; LOCAL_PORT=""; 
+LOCAL_USER=""; REMOTE_SETUP=""; LOCAL_OPEN=""; REMOTE_KILL=""; LOCAL_FWDHOST=""; LOCAL_FWDPORT=""; REMOTE_FWDPORT=""; REMOTE_FWDPUB="";
 CONNECTION_STATUS=$(echo $in | awk -F '[;]' '{print $1}')  #Enabled[E or D]
 CONNECTION_NAME=$(echo $in | awk -F '[;]' '{print $2}')    #Name[string]
 L_REMOTE_HOST=$(echo $in | awk -F '[;]' '{print $3}')      #Remote Host[string]
