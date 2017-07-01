@@ -89,20 +89,21 @@ L_LOCAL_OPEN=$(echo $in | awk -F '[;]' '{print $10}')      #Bypass NAT[int]
 L_REMOTE_KILL=$(echo $in | awk -F '[;]' '{print $11}')     #Kill Access[int]
 REMOTE_FWDPORT=$(echo $in | awk -F '[;]' '{print $12}')    #Server Remote Port[int]
 L_LOCAL_FWDHOST=$(echo $in | awk -F '[;]' '{print $13}')   #Server Local Host[string]
-LOCAL_FWDPORT=$(echo $in | awk -F '[;]' '{print $14}')     #Server Local Port[int]
+L_LOCAL_FWDPORT=$(echo $in | awk -F '[;]' '{print $14}')   #Server Local Port[int]
 L_REMOTE_FWDPUB=$(echo $in | awk -F '[;]' '{print $15}')   #Public or Local[P or L]
 
-if [ ${L_REMOTE_HOST}   != "^" ]; then REMOTE_HOST=${L_REMOTE_HOST};     fi
-if [ ${L_REMOTE_PORT}   != "^" ]; then REMOTE_PORT=${L_REMOTE_PORT};     fi
-if [ ${L_REMOTE_USER}   != "^" ]; then REMOTE_USER=${L_REMOTE_USER};     fi
-if [ ${L_LOCAL_HOST}    != "^" ]; then LOCAL_HOST=${L_LOCAL_HOST};       fi
-if [ ${L_LOCAL_PORT}    != "^" ]; then LOCAL_PORT=${L_LOCAL_PORT};       fi
-if [ ${L_LOCAL_USER}    != "^" ]; then LOCAL_USER=${L_LOCAL_USER};       fi
-if [ ${L_REMOTE_SETUP}  != "^" ]; then REMOTE_SETUP=${L_REMOTE_SETUP};   fi
-if [ ${L_LOCAL_OPEN}    != "^" ]; then LOCAL_OPEN=${L_LOCAL_OPEN};       fi
-if [ ${L_REMOTE_KILL}   != "^" ]; then REMOTE_KILL=${L_REMOTE_KILL};     fi
-if [ ${L_LOCAL_FWDHOST} != "^" ]; then LOCAL_FWDHOST=${L_LOCAL_FWDHOST}; fi
-if [ ${L_REMOTE_FWDPUB} != "^" ]; then REMOTE_FWDPUB=${L_REMOTE_FWDPUB}; fi
+if [ ${L_REMOTE_HOST}   != "" ]; then REMOTE_HOST=${L_REMOTE_HOST};     fi
+if [ ${L_REMOTE_PORT}   != "" ]; then REMOTE_PORT=${L_REMOTE_PORT};     fi
+if [ ${L_REMOTE_USER}   != "" ]; then REMOTE_USER=${L_REMOTE_USER};     fi
+if [ ${L_LOCAL_HOST}    != "" ]; then LOCAL_HOST=${L_LOCAL_HOST};       fi
+if [ ${L_LOCAL_PORT}    != "" ]; then LOCAL_PORT=${L_LOCAL_PORT};       fi
+if [ ${L_LOCAL_USER}    != "" ]; then LOCAL_USER=${L_LOCAL_USER};       fi
+if [ ${L_REMOTE_SETUP}  != "" ]; then REMOTE_SETUP=${L_REMOTE_SETUP};   fi
+if [ ${L_LOCAL_OPEN}    != "" ]; then LOCAL_OPEN=${L_LOCAL_OPEN};       fi
+if [ ${L_REMOTE_KILL}   != "" ]; then REMOTE_KILL=${L_REMOTE_KILL};     fi
+if [ ${L_LOCAL_FWDHOST} != "" ]; then LOCAL_FWDHOST=${L_LOCAL_FWDHOST}; fi
+if [ ${L_LOCAL_FWDPORT} != "" ]; then LOCAL_FWDPORT=${L_LOCAL_FWDPORT}; fi
+if [ ${L_REMOTE_FWDPUB} != "" ]; then REMOTE_FWDPUB=${L_REMOTE_FWDPUB}; fi
 
 if [ ${REMOTE_FWDPUB} = "p" ]; then EXTRA_OPT="${EXTRA_OPT} -L"; fi
 if [ ${REMOTE_SETUP} = "y" ]; then EXTRA_OPT="${EXTRA_OPT} -S"; fi
@@ -140,31 +141,28 @@ sleep 7
 WATCHDOG_GEN() {
 while read in; do
 	DATA_PARSER
-	if [ ${RUN} -eq 2 ] && [ ${CONNECTION_NAME} != "${REQ_CONNECTION_NAME}" ]; then CONNECTION_STATUS="s"; fi
-	if [ ${RUN} -eq 2 ] && [ ${CONNECTION_NAME} = "${REQ_CONNECTION_NAME}" ]; then CONNECTION_STATUS="e"; fi
-	if [ ${CONNECTION_STATUS} = "e" ]; then FORKER_LAUNCH	
-	elif [ ${CONNECTION_STATUS} = "d" ]; then echo "[${CONNECTION_NAME}][$(date)][ERR!] DISABLED"
-	fi
+	if [ ${RUN} -eq 2 ] && [ ${CONNECTION_NAME} != "${REQ_CONNECTION_NAME}" ]; then SKIP=1; fi
+	if [ ${CONNECTION_STATUS} = "e" ] && [ ${SKIP} -eq 0 ]; then FORKER_LAUNCH	
+	else echo "[${CONNECTION_NAME}][$(date)][ERR!] DISABLED"; fi
 done < $PORT_LIST
 }
 WATCHDOG_DROP() {
 while read in; do 
 	DATA_PARSER
-	if [ ${RUN} -eq 4 ] && [ ${CONNECTION_NAME} != "${REQ_CONNECTION_NAME}" ]; then SKIP="1"; fi
-	if [ ${RUN} -eq 4 ] && [ ${CONNECTION_NAME}  = "${REQ_CONNECTION_NAME}" ]; then SKIP="0"; fi
+	if [ ${RUN} -eq 4 ] && [ ${CONNECTION_NAME} != "${REQ_CONNECTION_NAME}" ]; then SKIP=1; fi
 	if [ ${SKIP} -eq 0 ]; then FORKER_DROP; fi
 done < $PORT_LIST
 }
 # PARSE INPUT ##########################################################################################################
 {
 if [ $# -lt 1 ]; then USAGE; exit 0; fi
-RUN=0; DRY=0; PORT_LIST="ports.lantis.csv"
+RUN=0; DRY=0; REQ_CONNECTION_NAME=""; PORT_LIST="./ports.lantis.csv"
 while getopts "RrKkXZ" opt; do 
   case $opt in
-	r) RUN=2;REQ_CONNECTION_NAME=${OPTARG};;
 	R) RUN=1;;
-	k) RUN=4;REQ_CONNECTION_NAME=${OPTARG};;
+	r) RUN=2; REQ_CONNECTION_NAME=${OPTARG};;
 	K) RUN=3;;
+	k) RUN=4; REQ_CONNECTION_NAME=${OPTARG};;
 	X) DRY=1;;
     Z) SETUPGUIDE; exit;;
     \?) echo "[PEBKAC] WTF is -$OPTARG?, thats not a accepted option, Abort"; USAGE; exit 1;;
