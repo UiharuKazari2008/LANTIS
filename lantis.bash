@@ -106,10 +106,10 @@ if [ ${L_LOCAL_FWDHOST} != "^" ]; then LOCAL_FWDHOST=${L_LOCAL_FWDHOST}; fi
 if [ ${L_LOCAL_FWDPORT} != "^" ]; then LOCAL_FWDPORT=${L_LOCAL_FWDPORT}; fi
 if [ ${L_REMOTE_FWDPUB} != "^" ]; then REMOTE_FWDPUB=${L_REMOTE_FWDPUB}; fi
 
-if [ ${REMOTE_FWDPUB} = "p" ]; then EXTRA_OPT="${EXTRA_OPT} -L"; fi
-if [ ${REMOTE_SETUP} = "y" ]; then EXTRA_OPT="${EXTRA_OPT} -S"; fi
-if [ ${LOCAL_OPEN} = "y" ]; then EXTRA_OPT="${EXTRA_OPT} -R"; fi
-if [ ${REMOTE_KILL} = "y" ]; then EXTRA_OPT="${EXTRA_OPT} -K"; fi
+if [ ${REMOTE_FWDPUB} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -L"; fi
+if [ ${REMOTE_SETUP} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -S"; fi
+if [ ${LOCAL_OPEN} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -R"; fi
+if [ ${REMOTE_KILL} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -K"; fi
 }
 FORKER_LAUNCH () {
 echo "[${CONNECTION_NAME}][$(date)][INFO] Launching..."
