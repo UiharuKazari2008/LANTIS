@@ -1,9 +1,7 @@
 #!/bin/bash
 
 # LANTIS EasyLink 2 #
-# Stop if no options
-RUN=0; DRY=0; PORT_LIST="ports.lantis.csv"
-# Display Usage
+# OPERATIONS ###########################################################################################################
 USAGE(){
 cat << EOF
      __    ___    _   _________________
@@ -46,9 +44,6 @@ cat << EOF
 
 EOF
 }
-
-
-# Display Setup Guide
 SETUPGUIDE(){
 cat << EOF
      __    ___    _   _________________
@@ -78,21 +73,6 @@ cat << EOF
 
 EOF
 }
-# Parse Options
-while getopts "RrKkXZ" opt; do 
-  case $opt in
-	r) RUN=2;REQ_CONNECTION_NAME=${OPTARG};;
-	R) RUN=1;;
-	k) RUN=4;REQ_CONNECTION_NAME=${OPTARG};;
-	K) RUN=3;;
-	X) DRY=1;;
-    Z) SETUPGUIDE; exit;;
-    \?) echo "[PEBKAC] WTF is -$OPTARG?, thats not a accepted option, Abort"; USAGE; exit 1;;
-    :) echo "[PEBKAC] -$OPTARG requires an argument, Abort"; USAGE; exit 1;;
-  esac
-done
-# Display Usage with no options
-if [ $# -lt 1 ]; then USAGE; exit; fi
 DATA_PARSER () {
 # e;test;remote.com;22;root;127.0.0.1;22;root;n;y;y;8989;192.168.0.2;8894;p
 SKIP=0; EXTRA_OPT=""
@@ -129,9 +109,6 @@ if [ ${REMOTE_SETUP} = "y" ]; then EXTRA_OPT="${EXTRA_OPT} -S"; fi
 if [ ${LOCAL_OPEN} = "y" ]; then EXTRA_OPT="${EXTRA_OPT} -R"; fi
 if [ ${REMOTE_KILL} = "y" ]; then EXTRA_OPT="${EXTRA_OPT} -K"; fi
 }
-
-
-
 FORKER_LAUNCH () {
 echo "[${CONNECTION_NAME}][$(date)][INFO] Launching..."
 if [ ${DRY} -eq 1 ]; then 
@@ -160,8 +137,6 @@ else
 fi
 sleep 7
 }
-
-
 WATCHDOG_GEN() {
 while read in; do
 	DATA_PARSER
@@ -180,7 +155,28 @@ while read in; do
 	if [ ${SKIP} -eq 0 ]; then FORKER_DROP; fi
 done < $PORT_LIST
 }
+# PARSE INPUT ##########################################################################################################
+{
+if [ $# -lt 1 ]; then USAGE; exit 0; fi
+RUN=0; DRY=0; PORT_LIST="ports.lantis.csv"
+while getopts "RrKkXZ" opt; do 
+  case $opt in
+	r) RUN=2;REQ_CONNECTION_NAME=${OPTARG};;
+	R) RUN=1;;
+	k) RUN=4;REQ_CONNECTION_NAME=${OPTARG};;
+	K) RUN=3;;
+	X) DRY=1;;
+    Z) SETUPGUIDE; exit;;
+    \?) echo "[PEBKAC] WTF is -$OPTARG?, thats not a accepted option, Abort"; USAGE; exit 1;;
+    :) echo "[PEBKAC] -$OPTARG requires an argument, Abort"; USAGE; exit 1;;
+  esac
+done
+} || {
+echo "Data Error"; exit 1
+}
+# POST VAR #############################################################################################################
 
+# MAIN RUNTIME #########################################################################################################
 cat << EOF
      __    ___    _   _________________
     / /   /   |  / | / /_  __/  _/ ___/
