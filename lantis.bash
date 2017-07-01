@@ -144,7 +144,7 @@ while read in; do
 	REMOTE_SETUP=""; LOCAL_OPEN=""; REMOTE_KILL=""; LOCAL_FWDHOST=""; LOCAL_FWDPORT=""; REMOTE_FWDPORT=""; REMOTE_FWDPUB=""; DATA_PARSER
 	if [ ${RUN} -eq 2 ] && [ ${CONNECTION_NAME} != "${REQ_CONNECTION_NAME}" ]; then SKIP=1; fi
 	if [ ${CONNECTION_STATUS} = "e" ] && [ ${SKIP} -eq 0 ]; then FORKER_LAUNCH	
-	else echo "[${CONNECTION_NAME}][$(date)][ERR!] DISABLED"; fi
+	elif [ ${CONNECTION_STATUS} = "d" ]; then echo "[${CONNECTION_NAME}][$(date)][ERR!] DISABLED"; fi
 done < $PORT_LIST
 }
 WATCHDOG_DROP() {
@@ -156,7 +156,6 @@ while read in; do
 done < $PORT_LIST
 }
 # PARSE INPUT ##########################################################################################################
-{
 if [ $# -lt 1 ]; then USAGE; exit 0; fi
 RUN=0; DRY=0; REQ_CONNECTION_NAME=""; PORT_LIST="./ports.lantis.csv"
 while getopts "RrKkXZ" opt; do 
@@ -171,9 +170,6 @@ while getopts "RrKkXZ" opt; do
     :) echo "[PEBKAC] -$OPTARG requires an argument, Abort"; USAGE; exit 1;;
   esac
 done
-} || {
-echo "Data Error"; exit 1
-}
 # POST VAR #############################################################################################################
 
 # MAIN RUNTIME #########################################################################################################

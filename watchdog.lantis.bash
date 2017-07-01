@@ -71,7 +71,6 @@ EOF
 if [ ${DRY} -eq 1 ]; then exit 0; fi
 }
 # PARSE INPUT ##########################################################################################################
-{ 
 if [ $# -lt 1 ]; then echo "No Data"; exit 1; fi
 REMOTE_PORTPUB=""; DRY=0; LOCAL_OPEN=1; REMOTE_KILL=0
 while getopts "m:n:h:p:u:H:P:U:D:t:T:LSRKX" opt; do 
@@ -96,9 +95,6 @@ while getopts "m:n:h:p:u:H:P:U:D:t:T:LSRKX" opt; do
     :) echo "[PEBKAC] -$OPTARG requires an argument, Abort"; USAGE; exit 1;;
   esac
 done
-} || {
-echo "Data Error"; exit 1
-}
 # POST VAR #############################################################################################################
 TIME_FAILED_CONN=2; TIME_FAILED_INET=5; TIMEOUT_VERIFY_INET=15; HOST_VERIFY="https://google.com"
 CMD_SSH="ssh"; CMD_SCP="scp"; KEY=lantis.key; SETUP_KEY="$HOME/.ssh/id_rsa"
