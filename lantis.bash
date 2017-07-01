@@ -129,7 +129,7 @@ if [[ $(echo $in | awk -F '[ ]' '{print $1}') != "#" ]]; then
 	
 	if [ ${RUN} -eq 2 ] && [ ${CONNECTION_NAME} != "${REQ_CONNECTION_NAME}" ]; then SKIP=1; fi
 	if [ ${CONNECTION_STATUS} = "e" ] && [ ${SKIP} -eq 0 ]; then FORKER_LAUNCH	
-	elif [ ${CONNECTION_STATUS} = "d" ]; then echo "[${CONNECTION_NAME}][$(date)][ERR!] DISABLED"; fi
+	elif [ ${CONNECTION_STATUS} = "d" ] && [ ${RUN} -eq 1 ]; then echo "[${CONNECTION_NAME}][$(date)][ERR!] DISABLED"; fi
 fi
 done < $PORT_LIST
 }
