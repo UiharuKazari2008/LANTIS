@@ -40,13 +40,6 @@ TEST_CONN_FAILED () {
 echo "[${CONNECTION_NAME}][$(date)][ERR!] Connection was lost!"
 sleep ${TIME_FAILED_CONN}
 }
-SELECT_REVERSE () {
-if [ ${LOCAL_OPEN} -eq 0 ]; then # Use Reverse SSH Tunneling
-	REMOTE_PFWD="-R ${LOCAL_PORT}:127.0.0.1:22"; LOCAL_IP="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date)][INFO] Reverse Conection will be used"
-elif [ ${LOCAL_OPEN} -eq 1 ]; then # Use Direct Connection
-	REMOTE_PFWD="";	if [ ${LOCAL_IP} = "~" ]; then LOCAL_IP="$(curl ipinfo.io/ip 2> /dev/null)"; fi
-fi
-}
 CONNECT_HOST () {
 echo "[${CONNECTION_NAME}][$(date)][INFO][>>>] Establishing Control..." 
 if [ ${DRY} -eq 1 ]; then echo "${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} <<"; fi
@@ -107,13 +100,23 @@ if  [ ${OPER_MODE} -eq 1 ]; then while [ $# -gt 9 ]; do
 			{ TEST_HOST_VERIFY 
 			} || { 
 			TEST_HOST_FAILED 
-			}; SELECT_REVERSE; CONNECT_HOST
+			}
+			if [ ${LOCAL_OPEN} -eq 0 ]; then # Use Reverse SSH Tunneling
+				REMOTE_PFWD="-R ${LOCAL_PORT}:127.0.0.1:22"; LOCAL_IP="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date)][INFO] Reverse Conection will be used"
+			elif [ ${LOCAL_OPEN} -eq 1 ]; then # Use Direct Connection
+				REMOTE_PFWD="";	if [ ${LOCAL_IP} = "~" ]; then LOCAL_IP="$(curl ipinfo.io/ip 2> /dev/null)"; fi
+			fi; CONNECT_HOST
 		else TEST_INET_FAILED; fi; TEST_CONN_FAILED
 	done
 elif  [ ${OPER_MODE} -eq 2 ]; then REMOTE_SETUP=0; if TEST_INET_VERIFY; then TEST_INET_PASSED
 		{ TEST_HOST_VERIFY 
 		} || { 
 		TEST_HOST_FAILED
-		}; SELECT_REVERSE; KILL_HOST
+		}
+		if [ ${LOCAL_OPEN} -eq 0 ]; then # Use Reverse SSH Tunneling
+			REMOTE_PFWD="-R ${LOCAL_PORT}:127.0.0.1:22"; LOCAL_IP="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date)][INFO] Reverse Conection will be used"
+		elif [ ${LOCAL_OPEN} -eq 1 ]; then # Use Direct Connection
+			REMOTE_PFWD="";	if [ ${LOCAL_IP} = "~" ]; then LOCAL_IP="$(curl ipinfo.io/ip 2> /dev/null)"; fi
+		fi; KILL_HOST
 	else TEST_INET_FAILED; fi; TEST_CONN_FAILED
 fi
