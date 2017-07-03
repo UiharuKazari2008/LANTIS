@@ -148,7 +148,7 @@ if [[ $(echo $in | awk -F '[ ]' '{print $1}') != "#" ]]; then
 	elif [ ${1} -eq 1 ] && [ ${#} -eq 2 ] && ( [ ${CONNECTION_STATUS} = "e" ] || [ ${CONNECTION_STATUS} = ">" ] ) && [ ${CONNECTION_NAME} = "${2}" ]; then FORKER ${1}
 	
 	elif [ ${1} -eq 2 ] && [ ${#} -eq 1 ] && ( [ ${CONNECTION_STATUS} = "e" ] || [ ${CONNECTION_STATUS} = ">" ] ); then FORKER ${1}
-	elif [ ${1} -eq 2 ] && [ ${#} -eq 2 ] && ( [ ${CONNECTION_STATUS} = "e" ] || [ ${CONNECTION_STATUS} = ">" ] ); then FORKER ${1}; fi
+	elif [ ${1} -eq 2 ] && [ ${#} -eq 2 ] && ( [ ${CONNECTION_STATUS} = "e" ] || [ ${CONNECTION_STATUS} = ">" ] ) && [ ${CONNECTION_NAME} = "${2}" ]; then FORKER ${1}; fi
 fi
 done < $PORT_LIST
 }
