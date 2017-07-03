@@ -50,20 +50,20 @@ if [ ${DRY} -eq 1 ]; then echo "${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p $
 ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_PFWD} << EOF
 	if [ ${1} = 1 ]; then
 		if [ ${REMOTE_KILL} -eq 1 ]; then netstat -tlpn | grep ":${REMOTE_FWDPORT} " | sed -n 's@.* \([0-9]*\)/.*@kill \1@p' | sh > /dev/null; fi
-		echo "[${CONNECTION_NAME}][$(date)][INFO][<<<] Linked!"; pkill -f "^${CMD_SSH}.*${LOCAL_PFWD}$" > /dev/null
+		echo "[${CONNECTION_NAME}][$(date)][INFO][<<<] Linked!"; pkill -f "^${CMD_SSH}.*${LOCAL_PFWD_LAST}$" > /dev/null
 		if [ ${DRY} -eq 1 ]; then echo "${LOCAL_USER}@${LOCAL_IP}:${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} -L ${LOCAL_PFWD}"
 		else ${CMD_SSH} ${LOCAL_IP} -l ${LOCAL_USER} -p ${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} ${LOCAL_PFWD}; fi
 		echo "[${CONNECTION_NAME}][$(date)][ERR!][<<<] ETOL"
 	elif [ ${1} = 2 ]; then
 		echo "[${CONNECTION_NAME}][$(date)][INFO][<<<] Dropping...!"
-		if [ ${DRY} -eq 1 ]; then pgrep -f "^${CMD_SSH}.*${LOCAL_PFWD}$"; else pkill -f "^${CMD_SSH}.*${LOCAL_PFWD}$" > /dev/null; fi; fi
+		if [ ${DRY} -eq 1 ]; then pgrep -f "^${CMD_SSH}.*${LOCAL_PFWD_LAST}$"; else pkill -f "^${CMD_SSH}.*${LOCAL_PFWD_LAST}$" > /dev/null; fi; fi
 EOF
 if [ ${DRY} -eq 1 ]; then exit 0; fi
 }
 # PARSE INPUT ##########################################################################################################
 if [ $# -lt 1 ]; then echo "No Data"; exit 1; fi
 REMOTE_PORTPUB=""; DRY=0; LOCAL_OPEN=1; REMOTE_KILL=0; REMOTE_SETUP=0; LOOPCON=1; LOCAL_PFWD="";
-while getopts "m:n:h:p:u:H:P:U:D:t:T:LSRKX" opt; do 
+while getopts "m:n:h:p:u:H:P:U:D:LSRKX" opt; do 
   case $opt in
   	m) OPER_MODE=${OPTARG};;
 	n) CONNECTION_NAME=${OPTARG};;
@@ -73,10 +73,7 @@ while getopts "m:n:h:p:u:H:P:U:D:t:T:LSRKX" opt; do
 	H) LOCAL_IP=${OPTARG};;
 	P) LOCAL_PORT=${OPTARG};;
 	U) LOCAL_USER=${OPTARG};;
-	D) LOCAL_FWDHOST=${OPTARG};;
-	t) REMOTE_FWDPORT=${OPTARG};;
-	T) LOCAL_FWDPORT=${OPTARG};;
-	d) LOCAL_PFWD="${LOCAL_PFWD}-L ${OPTARG} "
+	D) LOCAL_PFWD="${LOCAL_PFWD}-L ${OPTARG} "; LOCAL_PFWD_LAST=${OPTARG};;
 	L) REMOTE_PORTPUB=" -g";;
 	S) REMOTE_SETUP=1;;
 	R) LOCAL_OPEN=0;;

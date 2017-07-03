@@ -80,7 +80,7 @@ FORKER () {
 echo "[${CONNECTION_NAME}][$(date)][INFO] $(if [ ${1} = 1 ]; then echo "Launching"; elif [ ${1} = 2 ]; then echo "Dropping"; fi) Connection..."
 if [ ${DRY} -eq 1 ]; then 
 	echo "./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
-	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT}"
+	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} ${PORT_FWDLN}${EXTRA_OPT}"
 	bash ./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
 	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} ${PORT_FWDLN}${EXTRA_OPT} -m ${1} -X ${DRY}
 else 
