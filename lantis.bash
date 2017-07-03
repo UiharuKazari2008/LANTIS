@@ -130,8 +130,8 @@ if [[ $(echo $in | awk -F '[ ]' '{print $1}') != "#" ]]; then
 		if [ ${REMOTE_KILL} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT}-K "; fi
 		
 		PORT_FWDLN="-D ${REMOTE_FWDPORT}:${LOCAL_FWDHOST}:${LOCAL_FWDPORT} "
-	elif [[ $(echo $in | awk -F '[;]' '{print $1}') = "^" ]] || [[ $(echo $in | awk -F '[;]' '{print $1}') = "^^" ]]; then
-		CONNECTION_STATUS=$(echo $in | awk -F '[;]' '{print $1}')  #Enabled[E or D]
+	elif [[ $(echo $in | awk -F '[;]' '{print $1}') = "^" ]] || [[ $(echo $in | awk -F '[;]' '{print $1}') = ">" ]]; then
+		CONNECTION_STATUS=$(echo $in | awk -F '[;]' '{print $1}') #Enabled[E or D]
 		REMOTE_FWDPORT=$(echo $in | awk -F '[;]' '{print $2}')    #Server Remote Port[int]
 		L_LOCAL_FWDHOST=$(echo $in | awk -F '[;]' '{print $3}')   #Server Local Host[string]
 		L_LOCAL_FWDPORT=$(echo $in | awk -F '[;]' '{print $4}')   #Server Local Port[int]
@@ -144,11 +144,11 @@ if [[ $(echo $in | awk -F '[ ]' '{print $1}') != "#" ]]; then
 		PORT_FWDLN="${PORT_FWDLN}-D ${REMOTE_FWDPORT}:${LOCAL_FWDHOST}:${LOCAL_FWDPORT} "
 	fi
 	# Run Selector
-	if   [ ${1} -eq 1 ] && [ ${#} -eq 1 ] && [ ${CONNECTION_STATUS} = "e" -o ${CONNECTION_STATUS} = "^^" ]; then FORKER ${1}
-	elif [ ${1} -eq 1 ] && [ ${#} -eq 2 ] && [ ${CONNECTION_STATUS} = "e" -o ${CONNECTION_STATUS} = "^^" ] && [ ${CONNECTION_NAME} = "${2}" ]; then FORKER ${1}
+	if   [ ${1} -eq 1 ] && [ ${#} -eq 1 ] && ( [ ${CONNECTION_STATUS} = "e" ] || [ ${CONNECTION_STATUS} = ">" ] ) ; then FORKER ${1}
+	elif [ ${1} -eq 1 ] && [ ${#} -eq 2 ] && ( [ ${CONNECTION_STATUS} = "e" ] || [ ${CONNECTION_STATUS} = ">" ] ) && [ ${CONNECTION_NAME} = "${2}" ]; then FORKER ${1}
 	
-	elif [ ${1} -eq 2 ] && [ ${#} -eq 1 ] && ([ ${CONNECTION_STATUS} = "e" ] || [ ${CONNECTION_STATUS} = "l" ]); then FORKER ${1}
-	elif [ ${1} -eq 2 ] && [ ${#} -eq 2 ] && ([ ${CONNECTION_STATUS} = "e" ] || [ ${CONNECTION_STATUS} = "l" ]); then FORKER ${1}; fi
+	elif [ ${1} -eq 2 ] && [ ${#} -eq 1 ] && ( [ ${CONNECTION_STATUS} = "e" ] || [ ${CONNECTION_STATUS} = ">" ] ); then FORKER ${1}
+	elif [ ${1} -eq 2 ] && [ ${#} -eq 2 ] && ( [ ${CONNECTION_STATUS} = "e" ] || [ ${CONNECTION_STATUS} = ">" ] ); then FORKER ${1}; fi
 fi
 done < $PORT_LIST
 }
