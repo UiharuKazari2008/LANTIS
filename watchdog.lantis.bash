@@ -51,7 +51,7 @@ ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON
 	if [ ${1} = 1 ]; then
 		if [ ${REMOTE_KILL} -eq 1 ]; then netstat -tlpn | grep ":${REMOTE_FWDPORT} " | sed -n 's@.* \([0-9]*\)/.*@kill \1@p' | sh > /dev/null; fi
 		echo "[${CONNECTION_NAME}][$(date)][INFO][<<<] Linked!"; pkill -f "^${CMD_SSH}.*${LOCAL_PFWD_LAST}$" > /dev/null
-		if [ ${DRY} -eq 1 ]; then echo "${LOCAL_USER}@${LOCAL_IP}:${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} -L ${LOCAL_PFWD}"
+		if [ ${DRY} -eq 1 ]; then echo "${LOCAL_USER}@${LOCAL_IP}:${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} ${LOCAL_PFWD}"
 		else ${CMD_SSH} ${LOCAL_IP} -l ${LOCAL_USER} -p ${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} ${LOCAL_PFWD}; fi
 		echo "[${CONNECTION_NAME}][$(date)][ERR!][<<<] ETOL"
 	elif [ ${1} = 2 ]; then
