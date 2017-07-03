@@ -59,14 +59,18 @@ Web Server
 * Sets Inital Settings
 * Direct Connection with Dynamic IP
 * Foward Local Host Port 80 and 443
-```;web;25.97.71.244;22;root;~;65500;root;0;0;0;80;127.0.0.1;80;1;
+
+```
+;web;25.97.71.244;22;root;~;65500;root;0;0;0;80;127.0.0.1;80;1;
 e;web;^;^;^;^;^;^;^;^;^;443;^;443;^;
 ```
 
 Linked Connection
 * Another end point but keep all other Settings
 * 3 ports using same connection
-```l;admin;45.76.9.245;^;^;^;^;^;^;^;^;9998;192.168.0.90;3389;^;
+
+```
+l;admin;45.76.9.245;^;^;^;^;^;^;^;^;9998;192.168.0.90;3389;^;
 ^;9999;192.168.0.92;22;^;
 >;6100;192.168.0.91;^;^;
 ```
@@ -75,7 +79,9 @@ Bypass NAT
 * Bypass NAT Enabled
 * Using Local Host as transport (Don't have to but simplest)
 * 4 RDP Ports Open
-```e;rdp-1;^;^;^;127.0.0.1;65401;^;^;1;^;4000;192.168.0.101;3389;^;
+
+```
+e;rdp-1;^;^;^;127.0.0.1;65401;^;^;1;^;4000;192.168.0.101;3389;^;
 e;rdp-2;^;^;^;^;65402;^;^;^;^;4001;192.168.0.102;^;^;
 e;rdp-3;^;^;^;^;65403;^;^;^;^;4002;192.168.0.103;^;^;
 d;rdp-4;^;^;^;^;65404;^;^;^;^;4003;192.168.0.104;^;^;
@@ -111,3 +117,6 @@ d;rdp-4;^;^;^;^;65404;^;^;^;^;4003;192.168.0.104;^;^;
 ..* Does not yet support Linked Bypass mode (Multiple Connection trough the same tunnel), use normal linked mode
 * In linked mode, if one port were to get overloaded and cause a buffer overflow the whole link will drop will all linked ports and will have to automaticly reconnect. (Just a word of warning)
 * Disabled Connection are still read for inheritance
+
+### Config Files
+Defaults are fine unless you have a need to change some of the values
