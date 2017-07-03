@@ -143,8 +143,8 @@ if [[ $(echo $in | awk -F '[ ]' '{print $1}') != "#" ]]; then
 		PORT_FWDLN="${PORT_FWDLN}-D ${REMOTE_FWDPORT}:${LOCAL_FWDHOST}:${LOCAL_FWDPORT} "
 	fi
 	# Run Selector
-	if   [ ${1} -eq 1 ] && [ ${#} -eq 1 ] && [ ${CONNECTION_STATUS} = "e" -o ${CONNECTION_STATUS} = "^^" ]; then FORKER ${1}
-	elif [ ${1} -eq 1 ] && [ ${#} -eq 2 ] && [ ${CONNECTION_STATUS} = "e" -o ${CONNECTION_STATUS} = "^^" ] && [ ${CONNECTION_NAME} = "${2}" ]; then FORKER ${1}
+	if   [ ${1} -eq 1 ] && [ ${#} -eq 1 ] && [ ${CONNECTION_STATUS} -eq "e" -o ${CONNECTION_STATUS} -eq "^^" ]; then FORKER ${1}
+	elif [ ${1} -eq 1 ] && [ ${#} -eq 2 ] && [ ${CONNECTION_STATUS} -eq "e" -o ${CONNECTION_STATUS} -eq "^^" ] && [ ${CONNECTION_NAME} = "${2}" ]; then FORKER ${1}
 	
 	elif [ ${1} -eq 2 ] && [ ${#} -eq 1 ] && ([ ${CONNECTION_STATUS} = "e" ] || [ ${CONNECTION_STATUS} = "l" ]); then FORKER ${1}
 	elif [ ${1} -eq 2 ] && [ ${#} -eq 2 ] && ([ ${CONNECTION_STATUS} = "e" ] || [ ${CONNECTION_STATUS} = "l" ]); then FORKER ${1}; fi
