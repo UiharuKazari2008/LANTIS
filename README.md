@@ -105,11 +105,11 @@ d;rdp-4;^;^;^;^;65404;^;^;^;^;4003;192.168.0.104;^;^;
 15 Listen Publicly or Local to Remote Host
 
 #### Special Options
-* [~][6: Local Host IP or FQDN] Dynamic Public IP (Only Direct Mode)
-* [^][All but 1,2,12] Use last value
-* [l][1: Status] Linked Connection, Use one connection for multiple ports
-..* Use `^;5999;192.168.0.47;22;^;` for other ports [12,13,14,15]
-..* Use [>] for last port (Used as end stop, without this the whole connection will be ignored)
+* (~)(6: Local Host IP or FQDN) Dynamic Public IP (Only Direct Mode)
+* (^)(All but 1,2,12) Use last value
+* (l)(1: Status) Linked Connection, Use one connection for multiple ports
+..* Use `^;5999;192.168.0.47;22;^;` for other ports (12,13,14,15)
+..* Use (>) for last port (Used as end stop, without this the whole connection will be ignored)
 
 #### Notes
 * You can use multiple connections with the same name and they will be parsed as the connection group
@@ -120,3 +120,78 @@ d;rdp-4;^;^;^;^;65404;^;^;^;^;4003;192.168.0.104;^;^;
 
 ### Config Files
 Defaults are fine unless you have a need to change some of the values
+
+#### lantis.config
+```
+# Log File used for watchdogs
+LOG_FILE="./lantis.log"
+# Time to pause after launching a connection
+TIME_LAUNCH_PAUSE=4
+# Time to pause after dropping a connection
+TIME_DROP_PAUSE=2
+```
+
+#### watchdog.lantis.config
+```
+# Time to pause between a connection drop
+TIME_FAILED_CONN=2
+# Time to paues between a internet connection drop
+TIME_FAILED_INET=5
+# Timeout for internet test
+TIMEOUT_VERIFY_INET=15
+# Host to use for internet verification
+HOST_VERIFY="https://google.com"
+# SSH Command
+CMD_SSH="ssh"
+# SCP Command
+CMD_SCP="scp"
+# LANTIS Key used for 2-way auth
+KEY=lantis.key
+# Setup key used for setting up servers
+SETUP_KEY="$HOME/.ssh/id_rsa"
+# Common SSH options
+COMMON_OPT="-C -2 -o BatchMode=yes -o StrictHostKeyChecking=no -o TCPKeepAlive=yes -o ServerAliveInterval=5 -o ConnectTimeout=15 -o LogLevel=Error"
+# Endpoint Connection Back SSH Options
+LOCAL_OPT="-N -o CompressionLevel=9 -o ExitOnForwardFailure=yes"
+```
+
+## Usage
+```
+root@lantis-controller:~/LANTIS# bash lantis.bash
+= LANTIS Router 3 - Academy City Research =========
+[---------][Mon  3 Jul 17:04:16 UTC 2017][ OK ] System Ready
+ support : help.lantis.project@acr.moe
+
+ LANTIS EasyLink Router 2 - Usage:
+
+ Launch ================================================================
+ -l  Launch a Connecion           -L  Launch ALL Connections
+
+ Drop ==================================================================
+ -k  Drop a Connection            -K  Drop ALL Connections
+
+ Extra Options (MUST be set before a action) ===========================
+ -C  Use another port list (Default: ./ports.lantis.csv)
+ -X  Dry Run (Does not do any action but test full connection)
+ -Z  Display Setup Guide
+
+ NOTE: You can give multiple actions (ex: -l admin -k ssh -l rdp)
+
+root@lantis-controller:~/LANTIS#
+```
+### Launching a connection
+```
+root@lantis-controller:~/LANTIS# bash lantis.bash -C production.csv -l kazari-1
+= LANTIS Router 3 - Academy City Research =========
+[---------][Mon  3 Jul 17:05:44 UTC 2017][ OK ] System Ready
+[kazari-1][Mon  3 Jul 17:05:47 UTC 2017][INFO] Launching Connection...
+root@lantis-controller:~/LANTIS#
+```
+#### Log Output
+```
+[kazari-1][Mon  3 Jul 17:05:48 UTC 2017][INFO] DATA LOADED
+[kazari-1][Mon  3 Jul 17:05:49 UTC 2017][INFO] Outbound Internet Connection: OK
+[kazari-1][Mon  3 Jul 17:05:49 UTC 2017][INFO] Outbound End-Point:           OK
+[kazari-1][Mon  3 Jul 17:05:51 UTC 2017][INFO][>>>] Establishing Control...
+[kazari-1][Mon  3 Jul 17:05:51 UTC 2017][INFO][<<<] Linked!
+```
