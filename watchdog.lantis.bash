@@ -52,7 +52,7 @@ ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON
 		if [ ${REMOTE_KILL} -eq 1 ]; then netstat -tlpn | grep ":${REMOTE_FWDPORT} " | sed -n 's@.* \([0-9]*\)/.*@kill \1@p' | sh > /dev/null; fi
 		echo "[${CONNECTION_NAME}][$(date)][INFO][<<<] Linked!"; pkill -f "^${CMD_SSH}.*${LOCAL_PFWD}$" > /dev/null
 		if [ ${DRY} -eq 1 ]; then echo "${LOCAL_USER}@${LOCAL_IP}:${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} -L ${LOCAL_PFWD}"
-		else ${CMD_SSH} ${LOCAL_IP} -l ${LOCAL_USER} -p ${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} -L ${LOCAL_PFWD}; fi
+		else ${CMD_SSH} ${LOCAL_IP} -l ${LOCAL_USER} -p ${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} ${LOCAL_PFWD}; fi
 		echo "[${CONNECTION_NAME}][$(date)][ERR!][<<<] ETOL"
 	elif [ ${1} = 2 ]; then
 		echo "[${CONNECTION_NAME}][$(date)][INFO][<<<] Dropping...!"
@@ -62,7 +62,7 @@ if [ ${DRY} -eq 1 ]; then exit 0; fi
 }
 # PARSE INPUT ##########################################################################################################
 if [ $# -lt 1 ]; then echo "No Data"; exit 1; fi
-REMOTE_PORTPUB=""; DRY=0; LOCAL_OPEN=1; REMOTE_KILL=0; REMOTE_SETUP=0; LOOPCON=1;
+REMOTE_PORTPUB=""; DRY=0; LOCAL_OPEN=1; REMOTE_KILL=0; REMOTE_SETUP=0; LOOPCON=1; LOCAL_PFWD="";
 while getopts "m:n:h:p:u:H:P:U:D:t:T:LSRKX" opt; do 
   case $opt in
   	m) OPER_MODE=${OPTARG};;
@@ -76,6 +76,7 @@ while getopts "m:n:h:p:u:H:P:U:D:t:T:LSRKX" opt; do
 	D) LOCAL_FWDHOST=${OPTARG};;
 	t) REMOTE_FWDPORT=${OPTARG};;
 	T) LOCAL_FWDPORT=${OPTARG};;
+	d) LOCAL_PFWD="${LOCAL_PFWD}-L ${OPTARG} "
 	L) REMOTE_PORTPUB=" -g";;
 	S) REMOTE_SETUP=1;;
 	R) LOCAL_OPEN=0;;
@@ -89,7 +90,7 @@ done
 TIME_FAILED_CONN=2; TIME_FAILED_INET=5; TIMEOUT_VERIFY_INET=15; HOST_VERIFY="https://google.com"
 CMD_SSH="ssh"; CMD_SCP="scp"; KEY=lantis.key; SETUP_KEY="$HOME/.ssh/id_rsa"
 COMMON_OPT="-C -2 -o BatchMode=yes -o StrictHostKeyChecking=no -o TCPKeepAlive=yes -o ServerAliveInterval=5 -o ConnectTimeout=15 -o LogLevel=Error"
-LOCAL_OPT="-N -o CompressionLevel=9 -o ExitOnForwardFailure=yes"; LOCAL_PFWD="${REMOTE_FWDPORT}:${LOCAL_FWDHOST}:${LOCAL_FWDPORT}"
+LOCAL_OPT="-N -o CompressionLevel=9 -o ExitOnForwardFailure=yes"
 source ./watchdog.lantis.config
 # MAIN RUNTIME #########################################################################################################
 echo "[${CONNECTION_NAME}][$(date)][INFO] DATA LOADED"

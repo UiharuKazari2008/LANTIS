@@ -82,56 +82,72 @@ if [ ${DRY} -eq 1 ]; then
 	echo "./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
 	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT}"
 	bash ./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
-	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT} -m ${1} -X ${DRY}
+	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} ${PORT_FWDLN}${EXTRA_OPT} -m ${1} -X ${DRY}
 else 
 	pkill -f "bash ./watchdog.lantis.bash -n ${CONNECTION_NAME}*" > /dev/null
 	nohup bash ./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
-	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} -D ${LOCAL_FWDHOST} -t ${REMOTE_FWDPORT} -T ${LOCAL_FWDPORT}${EXTRA_OPT} -m ${1} &>> ${LOG_FILE} & 
+	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} ${PORT_FWDLN}${EXTRA_OPT}-m ${1} &>> ${LOG_FILE} & 
 fi
 sleep $(if [ ${1} = 1 ]; then echo "${TIME_LAUNCH_PAUSE}"; elif [ ${1} = 2 ]; then echo "${TIME_DROP_PAUSE}"; fi)
 }
 WATCHDOG() {
 while read in; do
 if [[ $(echo $in | awk -F '[ ]' '{print $1}') != "#" ]]; then
-	SKIP=0; EXTRA_OPT=""; 
-	CONNECTION_STATUS=$(echo $in | awk -F '[;]' '{print $1}')  #Enabled[E or D]
-	CONNECTION_NAME=$(echo $in | awk -F '[;]' '{print $2}')    #Name[string]
-	L_REMOTE_HOST=$(echo $in | awk -F '[;]' '{print $3}')      #Remote Host[string]
-	L_REMOTE_PORT=$(echo $in | awk -F '[;]' '{print $4}')      #Remote Port[string]
-	L_REMOTE_USER=$(echo $in | awk -F '[;]' '{print $5}')      #Remote User[string]
-	L_LOCAL_HOST=$(echo $in | awk -F '[;]' '{print $6}')       #Local Host[string]
-	L_LOCAL_PORT=$(echo $in | awk -F '[;]' '{print $7}')       #Local Port[string]
-	L_LOCAL_USER=$(echo $in | awk -F '[;]' '{print $8}')       #Local User[string]
-	L_REMOTE_SETUP=$(echo $in | awk -F '[;]' '{print $9}')     #Remote Setup[strng]
-	L_LOCAL_OPEN=$(echo $in | awk -F '[;]' '{print $10}')      #Bypass NAT[int]
-	L_REMOTE_KILL=$(echo $in | awk -F '[;]' '{print $11}')     #Kill Access[int]
-	REMOTE_FWDPORT=$(echo $in | awk -F '[;]' '{print $12}')    #Server Remote Port[int]
-	L_LOCAL_FWDHOST=$(echo $in | awk -F '[;]' '{print $13}')   #Server Local Host[string]
-	L_LOCAL_FWDPORT=$(echo $in | awk -F '[;]' '{print $14}')   #Server Local Port[int]
-	L_REMOTE_FWDPUB=$(echo $in | awk -F '[;]' '{print $15}')   #Public or Local[P or L]
-	# Read Value in Memory if "^"
-	if [ ${L_REMOTE_HOST}   != "^" ]; then REMOTE_HOST=${L_REMOTE_HOST};     fi
-	if [ ${L_REMOTE_PORT}   != "^" ]; then REMOTE_PORT=${L_REMOTE_PORT};     fi
-	if [ ${L_REMOTE_USER}   != "^" ]; then REMOTE_USER=${L_REMOTE_USER};     fi
-	if [ ${L_LOCAL_HOST}    != "^" ]; then LOCAL_HOST=${L_LOCAL_HOST};       fi
-	if [ ${L_LOCAL_PORT}    != "^" ]; then LOCAL_PORT=${L_LOCAL_PORT};       fi
-	if [ ${L_LOCAL_USER}    != "^" ]; then LOCAL_USER=${L_LOCAL_USER};       fi
-	if [ ${L_REMOTE_SETUP}  != "^" ]; then REMOTE_SETUP=${L_REMOTE_SETUP};   fi
-	if [ ${L_LOCAL_OPEN}    != "^" ]; then LOCAL_OPEN=${L_LOCAL_OPEN};       fi
-	if [ ${L_REMOTE_KILL}   != "^" ]; then REMOTE_KILL=${L_REMOTE_KILL};     fi
-	if [ ${L_LOCAL_FWDHOST} != "^" ]; then LOCAL_FWDHOST=${L_LOCAL_FWDHOST}; fi
-	if [ ${L_LOCAL_FWDPORT} != "^" ]; then LOCAL_FWDPORT=${L_LOCAL_FWDPORT}; fi
-	if [ ${L_REMOTE_FWDPUB} != "^" ]; then REMOTE_FWDPUB=${L_REMOTE_FWDPUB}; fi
-	# Option Selector
-	if [ ${REMOTE_FWDPUB} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -L"; fi
-	if [ ${REMOTE_SETUP} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -S"; fi
-	if [ ${LOCAL_OPEN} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -R"; fi
-	if [ ${REMOTE_KILL} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT} -K"; fi
+	if [[ $(echo $in | awk -F '[;]' '{print $1}') = "e" ]] || [[ $(echo $in | awk -F '[;]' '{print $1}') = "d" ]] || [[ $(echo $in | awk -F '[;]' '{print $1}') = "l" ]]; then
+		SKIP=0; EXTRA_OPT=""; 
+		CONNECTION_STATUS=$(echo $in | awk -F '[;]' '{print $1}')  #Enabled[E or D]
+		CONNECTION_NAME=$(echo $in | awk -F '[;]' '{print $2}')    #Name[string]
+		L_REMOTE_HOST=$(echo $in | awk -F '[;]' '{print $3}')      #Remote Host[string]
+		L_REMOTE_PORT=$(echo $in | awk -F '[;]' '{print $4}')      #Remote Port[string]
+		L_REMOTE_USER=$(echo $in | awk -F '[;]' '{print $5}')      #Remote User[string]
+		L_LOCAL_HOST=$(echo $in | awk -F '[;]' '{print $6}')       #Local Host[string]
+		L_LOCAL_PORT=$(echo $in | awk -F '[;]' '{print $7}')       #Local Port[string]
+		L_LOCAL_USER=$(echo $in | awk -F '[;]' '{print $8}')       #Local User[string]
+		L_REMOTE_SETUP=$(echo $in | awk -F '[;]' '{print $9}')     #Remote Setup[strng]
+		L_LOCAL_OPEN=$(echo $in | awk -F '[;]' '{print $10}')      #Bypass NAT[int]
+		L_REMOTE_KILL=$(echo $in | awk -F '[;]' '{print $11}')     #Kill Access[int]
+		REMOTE_FWDPORT=$(echo $in | awk -F '[;]' '{print $12}')    #Server Remote Port[int]
+		L_LOCAL_FWDHOST=$(echo $in | awk -F '[;]' '{print $13}')   #Server Local Host[string]
+		L_LOCAL_FWDPORT=$(echo $in | awk -F '[;]' '{print $14}')   #Server Local Port[int]
+		L_REMOTE_FWDPUB=$(echo $in | awk -F '[;]' '{print $15}')   #Public or Local[P or L]
+		# Read Value in Memory if "^"
+		if [ ${L_REMOTE_HOST}   != "^" ]; then REMOTE_HOST=${L_REMOTE_HOST};     fi
+		if [ ${L_REMOTE_PORT}   != "^" ]; then REMOTE_PORT=${L_REMOTE_PORT};     fi
+		if [ ${L_REMOTE_USER}   != "^" ]; then REMOTE_USER=${L_REMOTE_USER};     fi
+		if [ ${L_LOCAL_HOST}    != "^" ]; then LOCAL_HOST=${L_LOCAL_HOST};       fi
+		if [ ${L_LOCAL_PORT}    != "^" ]; then LOCAL_PORT=${L_LOCAL_PORT};       fi
+		if [ ${L_LOCAL_USER}    != "^" ]; then LOCAL_USER=${L_LOCAL_USER};       fi
+		if [ ${L_REMOTE_SETUP}  != "^" ]; then REMOTE_SETUP=${L_REMOTE_SETUP};   fi
+		if [ ${L_LOCAL_OPEN}    != "^" ]; then LOCAL_OPEN=${L_LOCAL_OPEN};       fi
+		if [ ${L_REMOTE_KILL}   != "^" ]; then REMOTE_KILL=${L_REMOTE_KILL};     fi
+		if [ ${L_LOCAL_FWDHOST} != "^" ]; then LOCAL_FWDHOST=${L_LOCAL_FWDHOST}; fi
+		if [ ${L_LOCAL_FWDPORT} != "^" ]; then LOCAL_FWDPORT=${L_LOCAL_FWDPORT}; fi
+		if [ ${L_REMOTE_FWDPUB} != "^" ]; then REMOTE_FWDPUB=${L_REMOTE_FWDPUB}; fi
+		# Option Selector
+		if [ ${REMOTE_FWDPUB} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT}-L "; fi
+		if [ ${REMOTE_SETUP} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT}-S "; fi
+		if [ ${LOCAL_OPEN} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT}-R "; fi
+		if [ ${REMOTE_KILL} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT}-K "; fi
+		
+		PORT_FWDLN="-D ${REMOTE_FWDPORT}:${LOCAL_FWDHOST}:${LOCAL_FWDPORT} "
+	elif [[ $(echo $in | awk -F '[;]' '{print $1}') = "^" ]] || [[ $(echo $in | awk -F '[;]' '{print $1}') = ">" ]]; then
+		REMOTE_FWDPORT=$(echo $in | awk -F '[;]' '{print $12}')    #Server Remote Port[int]
+		L_LOCAL_FWDHOST=$(echo $in | awk -F '[;]' '{print $13}')   #Server Local Host[string]
+		L_LOCAL_FWDPORT=$(echo $in | awk -F '[;]' '{print $14}')   #Server Local Port[int]
+		L_REMOTE_FWDPUB=$(echo $in | awk -F '[;]' '{print $15}')   #Public or Local[P or L]
+		
+		if [ ${L_LOCAL_FWDHOST} != "^" ]; then LOCAL_FWDHOST=${L_LOCAL_FWDHOST}; fi
+		if [ ${L_LOCAL_FWDPORT} != "^" ]; then LOCAL_FWDPORT=${L_LOCAL_FWDPORT}; fi
+		if [ ${L_REMOTE_FWDPUB} != "^" ]; then REMOTE_FWDPUB=${L_REMOTE_FWDPUB}; fi
+		
+		PORT_FWDLN="${PORT_FWDLN}-D ${REMOTE_FWDPORT}:${LOCAL_FWDHOST}:${LOCAL_FWDPORT} "
+	fi
 	# Run Selector
-	if   [ ${1} -eq 1 ] && [ ${#} -eq 1 ] && [ ${CONNECTION_STATUS} = "e" ]; then FORKER ${1}
-	elif [ ${1} -eq 1 ] && [ ${#} -eq 2 ] && [ ${CONNECTION_STATUS} = "e" ] && [ ${CONNECTION_NAME} = "${2}" ]; then FORKER ${1}
-	elif [ ${1} -eq 2 ] && [ ${#} -eq 1 ] && [ ${CONNECTION_STATUS} = "e" ]; then FORKER ${1}
-	elif [ ${1} -eq 2 ] && [ ${#} -eq 2 ] && [ ${CONNECTION_NAME} = "${2}" ]; then FORKER ${1}; fi
+	if   [ ${1} -eq 1 ] && [ ${#} -eq 1 ] && ([ ${CONNECTION_STATUS} = "e" ] || [ ${CONNECTION_STATUS} = ">" ]); then FORKER ${1}
+	elif [ ${1} -eq 1 ] && [ ${#} -eq 2 ] && ([ ${CONNECTION_STATUS} = "e" ] || [ ${CONNECTION_STATUS} = ">" ]) && [ ${CONNECTION_NAME} = "${2}" ]; then FORKER ${1}
+	
+	elif [ ${1} -eq 2 ] && [ ${#} -eq 1 ] && ([ ${CONNECTION_STATUS} = "e" ] || [ ${CONNECTION_STATUS} = "l" ]); then FORKER ${1}
+	elif [ ${1} -eq 2 ] && [ ${#} -eq 2 ] && ([ ${CONNECTION_STATUS} = "e" ] || [ ${CONNECTION_STATUS} = "l" ]); then FORKER ${1}; fi
 fi
 done < $PORT_LIST
 }
