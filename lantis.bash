@@ -131,10 +131,10 @@ if [[ $(echo $in | awk -F '[ ]' '{print $1}') != "#" ]]; then
 		
 		PORT_FWDLN="-D ${REMOTE_FWDPORT}:${LOCAL_FWDHOST}:${LOCAL_FWDPORT} "
 	elif [[ $(echo $in | awk -F '[;]' '{print $1}') = "^" ]] || [[ $(echo $in | awk -F '[;]' '{print $1}') = ">" ]]; then
-		REMOTE_FWDPORT=$(echo $in | awk -F '[;]' '{print $12}')    #Server Remote Port[int]
-		L_LOCAL_FWDHOST=$(echo $in | awk -F '[;]' '{print $13}')   #Server Local Host[string]
-		L_LOCAL_FWDPORT=$(echo $in | awk -F '[;]' '{print $14}')   #Server Local Port[int]
-		L_REMOTE_FWDPUB=$(echo $in | awk -F '[;]' '{print $15}')   #Public or Local[P or L]
+		REMOTE_FWDPORT=$(echo $in | awk -F '[;]' '{print $2}')    #Server Remote Port[int]
+		L_LOCAL_FWDHOST=$(echo $in | awk -F '[;]' '{print $3}')   #Server Local Host[string]
+		L_LOCAL_FWDPORT=$(echo $in | awk -F '[;]' '{print $4}')   #Server Local Port[int]
+		L_REMOTE_FWDPUB=$(echo $in | awk -F '[;]' '{print $5}')   #Public or Local[P or L]
 		
 		if [ ${L_LOCAL_FWDHOST} != "^" ]; then LOCAL_FWDHOST=${L_LOCAL_FWDHOST}; fi
 		if [ ${L_LOCAL_FWDPORT} != "^" ]; then LOCAL_FWDPORT=${L_LOCAL_FWDPORT}; fi
