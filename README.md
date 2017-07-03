@@ -107,7 +107,7 @@ d;rdp-4;^;^;^;^;65404;^;^;^;^;4003;192.168.0.104;^;^;
 #### Special Options
 * ( ~ )(6: Local Host IP or FQDN) Dynamic Public IP (Only Direct Mode)
 * ( ^ )(All but 1,2,12) Use last value
-* (l)(1: Status) Linked Connection, Use one connection for multiple ports
+* ( l )(1: Status) Linked Connection, Use one connection for multiple ports
 ..* Use `^;5999;192.168.0.47;22;^;` for other ports (12,13,14,15)
 ..* Use ( > ) for last port (Used as end stop, without this the whole connection will be ignored)
 
