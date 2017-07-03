@@ -31,12 +31,12 @@ LANTIS is a system that allows you use simple low end Linux systems (Raspberry P
 
 ## Setup
 1 Install a Raspberry Pi or any other system
-2 Generate a SSH Keypair
+2 Generate a SSH Key pair
 3 Clone this Git
 4 cd LANTIS/
-5 Generate a SSH Keypair with the name lantis.key
+5 Generate a SSH Key pair with the name lantis.key
 6 Get a remote host from Digital Ocean or Vultr (Cheaper) with lowest hardware
-7 Add your user SSH key to host for setup  (Confirm you can login)
+7 Add your user SSH key to host for setup (Confirm you can login)
 8 Configure CSV File and config files
 9 Run with -X option in front for Dry Run (Connects and does setup but does not route packets) 
 
@@ -56,9 +56,9 @@ d;rdp-4;^;^;^;^;65404;^;^;^;^;4003;192.168.0.104;^;^;
 ```
 
 Web Server
-* Sets Inital Settings
+* Sets Initial Settings
 * Direct Connection with Dynamic IP
-* Foward Local Host Port 80 and 443
+* Forward Local Host Port 80 and 443
 
 ```
 ;web;25.97.71.244;22;root;~;65500;root;0;0;0;80;127.0.0.1;80;1;
@@ -115,7 +115,7 @@ d;rdp-4;^;^;^;^;65404;^;^;^;^;4003;192.168.0.104;^;^;
 * You can use multiple connections with the same name and they will be parsed as the connection group
 * To use Bypass NAT you must set 6 to 127.0.0.1, 10 to 1, and 7 to a unique port for each connection
 ..* Does not yet support Linked Bypass mode (Multiple Connection trough the same tunnel), use normal linked mode
-* In linked mode, if one port were to get overloaded and cause a buffer overflow the whole link will drop will all linked ports and will have to automaticly reconnect. (Just a word of warning)
+* In linked mode, if one port were to get overloaded and cause a buffer overflow the whole link will drop will all linked ports and will have to automatically reconnect. (Just a word of warning)
 * Disabled Connection are still read for inheritance
 
 ### Config Files
