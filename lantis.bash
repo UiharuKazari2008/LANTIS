@@ -1,5 +1,6 @@
 #!/bin/bash
 
+if [ -f ./.stat.inet ]; then rm -f ./.stat.inet; echo "[---------][$(date "${DATE_FORMAT}")][WARN] Watchdog State Control will be dropped"; fi
 # LANTIS EasyLink 2 #
 # OPERATIONS ###########################################################################################################
 HEADER() {
