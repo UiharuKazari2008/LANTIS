@@ -39,7 +39,6 @@ if [ ! -f ./.stat.inet ]; then
 		if TEST_INET_VERIFY; then TEST_INET_PASSED; rm ./.stat.inet; else sleep ${TIME_FAILED_INET}; fi
 	done
 fi
-while [ -f ./.stat.inet ]; do sleep 2; done
 }
 TEST_CONN_FAILED () {
 echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][ERR!] Connection was lost!"
@@ -95,6 +94,7 @@ done
 # MAIN RUNTIME #########################################################################################################
 echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] DATA LOADED"
 while [ ${LOOPCON} -eq 1 ]; do
+	while [ -f ./.stat.inet ]; do sleep 2; done
 	if TEST_INET_VERIFY; then TEST_INET_PASSED
 		{ TEST_HOST_VERIFY 
 		} || { TEST_HOST_FAILED 
