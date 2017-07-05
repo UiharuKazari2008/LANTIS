@@ -31,13 +31,12 @@ wget -q --spider ${HOST_VERIFY} --timeout=${TIMEOUT_VERIFY_INET}
 }
 TEST_INET_PASSED () {
 echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Internet Connection: OK"
-rm ./.stat.inet
 }
 TEST_INET_FAILED () {
 if [ ! -f ./.stat.inet ]; then 
 	echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][ERR!] Internet Connection: Failed"; echo > ./.stat.inet
 	while [ -f ./.stat.inet ]; do
-		if TEST_INET_VERIFY; then TEST_INET_PASSED; else sleep ${TIME_FAILED_INET}; fi
+		if TEST_INET_VERIFY; then TEST_INET_PASSED; rm ./.stat.inet; else sleep ${TIME_FAILED_INET}; fi
 	done
 fi
 while [ -f ./.stat.inet ]; do sleep 2; done
