@@ -4,11 +4,11 @@
 # OPERATIONS ###########################################################################################################
 TEST_HOST_VERIFY () { 
 ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} << EOF
-echo "[${CONNECTION_NAME}][$(date)][INFO] Outbound End-Point:           OK"
+echo "[${CONNECTION_NAME}][$(date)][INFO] Outbound End-Point: OK"
 EOF
 }
 TEST_HOST_FAILED () { 
-echo "[${CONNECTION_NAME}][$(date)][ERR!] Outbound End-Point:    No Access"
+echo "[${CONNECTION_NAME}][$(date)][ERR!] Outbound End-Point: No Access"
 if [ ${REMOTE_SETUP} -eq 1 ]; then
 	echo "[${CONNECTION_NAME}][$(date)][INFO] Passing Key to End-Point..."
 	${CMD_SCP} ${COMMON_OPT} -o Port=${REMOTE_PORT} ${KEY} ${REMOTE_USER}@${REMOTE_HOST}:${KEY}
@@ -30,12 +30,12 @@ TEST_INET_VERIFY () {
 wget -q --spider ${HOST_VERIFY} --timeout=${TIMEOUT_VERIFY_INET}
 }
 TEST_INET_PASSED () {
-echo "[${CONNECTION_NAME}][$(date)][INFO] Outbound Internet Connection: OK"
+echo "[${CONNECTION_NAME}][$(date)][INFO] Internet Connection: OK"
 rm ./.stat.inet
 }
 TEST_INET_FAILED () {
 if [ ! -f ./.stat.inet ]; then 
-	echo "[${CONNECTION_NAME}][$(date)][ERR!] Outbound Internet Connection: Failed"; echo > ./.stat.inet
+	echo "[${CONNECTION_NAME}][$(date)][ERR!] Internet Connection: Failed"; echo > ./.stat.inet
 	while [ -f ./.stat.inet ]; do
 		if TEST_INET_VERIFY; then TEST_INET_PASSED; else sleep ${TIME_FAILED_INET}; fi
 	done
