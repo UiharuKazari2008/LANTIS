@@ -31,10 +31,16 @@ wget -q --spider ${HOST_VERIFY} --timeout=${TIMEOUT_VERIFY_INET}
 }
 TEST_INET_PASSED () {
 echo "[${CONNECTION_NAME}][$(date)][INFO] Outbound Internet Connection: OK"
+rm ./.stat.inet
 }
 TEST_INET_FAILED () {
-echo "[${CONNECTION_NAME}][$(date)][ERR!] Outbound Internet Connection: Failed"
-sleep ${TIME_FAILED_INET}
+if [ ! -f ./.stat.inet ]; then 
+	echo "[${CONNECTION_NAME}][$(date)][ERR!] Outbound Internet Connection: Failed"; echo > ./.stat.inet
+	while [ -f ./.stat.inet ]; do
+		if TEST_INET_VERIFY; then TEST_INET_PASSED; else sleep ${TIME_FAILED_INET}; fi
+	done
+fi
+while [ -f ./.stat.inet ]; do sleep 2; done
 }
 TEST_CONN_FAILED () {
 echo "[${CONNECTION_NAME}][$(date)][ERR!] Connection was lost!"
@@ -92,9 +98,9 @@ source ./.watchdog.lantis.config
 # MAIN RUNTIME #########################################################################################################
 echo "[${CONNECTION_NAME}][$(date)][INFO] DATA LOADED"
 while [ ${LOOPCON} -eq 1 ]; do
-		if TEST_INET_VERIFY; then TEST_INET_PASSED
-			{ TEST_HOST_VERIFY 
-			} || { TEST_HOST_FAILED 
-			}; LINK ${OPER_MODE}; if [ ${OPER_MODE} -eq 2 ]; then LOOPCON=0; fi
-		else TEST_INET_FAILED; fi; TEST_CONN_FAILED
-	done
+	if TEST_INET_VERIFY; then TEST_INET_PASSED
+		{ TEST_HOST_VERIFY 
+		} || { TEST_HOST_FAILED 
+		}; LINK ${OPER_MODE}; if [ ${OPER_MODE} -eq 2 ]; then LOOPCON=0; fi
+	else TEST_INET_FAILED; fi; TEST_CONN_FAILED
+done
