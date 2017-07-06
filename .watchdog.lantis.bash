@@ -18,7 +18,7 @@ EOF
 	echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Passing Key to Local..."
 	if [ ${LOCAL_IP} = "~" ] || [ ${LOCAL_OPEN} -eq 0 ]; then echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
 	else 
-		${CMD_SCP} ${COMMON_OPT} -o Port=${REMOTE_PORT} ${KEY} ${LOCAL_IP}@${LOCAL_USER}:${KEY}
+		${CMD_SCP} ${COMMON_OPT} -o Port=${REMOTE_PORT} ${KEY} ${LOCAL_USER}@${LOCAL_IP}:${KEY}
 		${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${SETUP_KEY} ${COMMON_OPT} << EOF
 		echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
 EOF
