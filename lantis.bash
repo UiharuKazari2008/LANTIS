@@ -86,7 +86,7 @@ if [ ${DRY} -eq 1 ]; then
 	bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
 	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} ${PORT_FWDLN}${EXTRA_OPT} -m ${1} -X ${DRY}
 else 
-	pkill -f "^bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME}*." > /dev/null
+	pkill -f "^bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} *." > /dev/null
 	nohup bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
 	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} ${PORT_FWDLN}${EXTRA_OPT}-m ${1} &>> ${LOG_FILE} & 
 fi
