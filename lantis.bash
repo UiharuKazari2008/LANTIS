@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # LANTIS EasyLink 2 #
+if [ -f ./.stat.inet ]; then rm -f ./.stat.inet; echo "[---------][$(date "${DATE_FORMAT}")][WARN] Watchdog State Control will be dropped"; fi
 # OPERATIONS ###########################################################################################################
 HEADER() {
 cat << EOF
@@ -35,6 +36,7 @@ cat << EOF
 
 EOF
 }
+if [ $# -lt 1 ]; then HEADER; USAGE; exit 0; fi
 SETUPGUIDE(){
 cat << EOF
  support : help.lantis.project@acr.moe
@@ -77,15 +79,15 @@ cat << EOF
 EOF
 }
 FORKER () {
-echo "[${CONNECTION_NAME}][$(date)][INFO] $(if [ ${1} = 1 ]; then echo "Launching"; elif [ ${1} = 2 ]; then echo "Dropping"; fi) Connection..."
+echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] $(if [ ${1} = 1 ]; then echo "Launching"; elif [ ${1} = 2 ]; then echo "Dropping"; fi) Connection..."
 if [ ${DRY} -eq 1 ]; then 
-	echo "./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
+	echo "./.watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
 	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} ${PORT_FWDLN}${EXTRA_OPT}"
-	bash ./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
+	bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
 	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} ${PORT_FWDLN}${EXTRA_OPT} -m ${1} -X ${DRY}
 else 
-	pkill -f "bash ./watchdog.lantis.bash -n ${CONNECTION_NAME}*" > /dev/null
-	nohup bash ./watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
+	pkill -f "^bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} *." > /dev/null
+	nohup bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
 	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} ${PORT_FWDLN}${EXTRA_OPT}-m ${1} &>> ${LOG_FILE} & 
 fi
 sleep $(if [ ${1} = 1 ]; then echo "${TIME_LAUNCH_PAUSE}"; elif [ ${1} = 2 ]; then echo "${TIME_DROP_PAUSE}"; fi)
@@ -152,12 +154,13 @@ if [[ $(echo $in | awk -F '[ ]' '{print $1}') != "#" ]]; then
 fi
 done < $PORT_LIST
 }
+# SET VARS #############################################################################################################
+DRY=0; PORT_LIST="./ports.lantis.csv"; LOG_FILE="./lantis.log"; TIME_LAUNCH_PAUSE=4; TIME_DROP_PAUSE=2; DATE_FORMAT='+%d/%m/%Y %H:%M:%S'
+source ./.lantis.config
 # MAIN RUNTIME #########################################################################################################
 echo "= LANTIS Router 3 - Academy City Research ========="
-echo "[---------][$(date)][ OK ] System Ready"
-if [ $# -lt 1 ]; then USAGE; exit 0; fi
-DRY=0; PORT_LIST="./ports.lantis.csv"; LOG_FILE="./lantis.log"; TIME_LAUNCH_PAUSE=4; TIME_DROP_PAUSE=2
-source ./lantis.config
+echo "[---------][$(date "${DATE_FORMAT}")][ OK ] System Ready"
+# PARSE INPUT ##########################################################################################################
 while getopts "C:XLl:Kk:Z" opt; do 
   case $opt in
   	C) PORT_LIST="${OPTARG}";;
