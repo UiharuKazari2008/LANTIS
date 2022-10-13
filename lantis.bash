@@ -126,13 +126,13 @@ FORKER () {
     if [ -n "${REMOTE_LPORT}" ]; then EXTRA_OPT="${EXTRA_OPT}-q ${REMOTE_LPORT}"; fi
 
     if [ ${DRY} -eq 1 ]; then
-      echo "./.watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT:=22} -u ${REMOTE_USER:=root} \
-      -H ${LOCAL_HOST:=127.0.0.1} -P ${LOCAL_PORT:=22} -U ${LOCAL_USER:=root} ${PORT_FWDLN}${EXTRA_OPT} -m ${2} -X ${DRY}";
-      bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT:=22} -u ${REMOTE_USER:=root} \
-      -H ${LOCAL_HOST:=127.0.0.1} -P ${LOCAL_PORT:=22} -U ${LOCAL_USER:=root} ${PORT_FWDLN}${EXTRA_OPT} -m ${2} -X ${DRY};
+      echo "./.watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT:-22} -u ${REMOTE_USER:-root} \
+      -H ${LOCAL_HOST:-127.0.0.1} -P ${LOCAL_PORT:-22} -U ${LOCAL_USER:-root} ${PORT_FWDLN}${EXTRA_OPT} -m ${2} -X ${DRY}";
+      bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT:-22} -u ${REMOTE_USER:-root} \
+      -H ${LOCAL_HOST:-127.0.0.1} -P ${LOCAL_PORT:-22} -U ${LOCAL_USER:-root} ${PORT_FWDLN}${EXTRA_OPT} -m ${2} -X ${DRY};
     else
       pkill -f "^bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} *." > /dev/null;
-      nohup bash ./.watchdog.lantis.bash -n "${CONNECTION_NAME}" -h "${REMOTE_HOST}" -p "${REMOTE_PORT:=22}" -u "${REMOTE_USER:=root}" -H "${LOCAL_HOST:=127.0.0.1}" -P "${LOCAL_PORT:=22}" -U "${LOCAL_USER:=root}" ${PORT_FWDLN}${EXTRA_OPT} -m "${2}" >> "${LOG_FILE}"&
+      nohup bash ./.watchdog.lantis.bash -n "${CONNECTION_NAME}" -h "${REMOTE_HOST}" -p "${REMOTE_PORT:-22}" -u "${REMOTE_USER:-root}" -H "${LOCAL_HOST:-127.0.0.1}" -P "${LOCAL_PORT:-22}" -U "${LOCAL_USER:-root}" ${PORT_FWDLN}${EXTRA_OPT} -m "${2}" >> "${LOG_FILE}"&
     fi
     sleep $(if [ ${2} = 1 ]; then echo "${TIME_LAUNCH_PAUSE}"; elif [ ${2} = 2 ]; then echo "${TIME_DROP_PAUSE}"; fi);
   fi

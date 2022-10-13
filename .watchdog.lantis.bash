@@ -46,9 +46,9 @@ sleep ${TIME_FAILED_CONN}
 }
 LINK () {
 if [ ${LOCAL_OPEN} -eq 0 ]; then # Use Reverse SSH Tunneling
-	REMOTE_PFWD="-R ${REMOTE_LPORT:=65100}:127.0.0.1:${LOCAL_PORT:=22}"; LOCAL_HOST="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Reverse Conection will be used"
+	REMOTE_PFWD="-R ${REMOTE_LPORT:-65100}:127.0.0.1:${LOCAL_PORT:-22}"; LOCAL_HOST="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Reverse Conection will be used"
 elif [ ${LOCAL_OPEN} -eq 1 ]; then # Use Direct Connection
-	REMOTE_LPORT="${LOCAL_PORT:=22}"; REMOTE_PFWD="";	if [ ${LOCAL_HOST} = "~" ]; then LOCAL_HOST="$(curl ipinfo.io/ip 2> /dev/null)"; fi; fi
+	REMOTE_LPORT="${LOCAL_PORT:-22}"; REMOTE_PFWD="";	if [ ${LOCAL_HOST} = "~" ]; then LOCAL_HOST="$(curl ipinfo.io/ip 2> /dev/null)"; fi; fi
 echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO][>>>] Establishing Control..." 
 if [ ${DRY} -eq 1 ]; then echo "${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_LOCALPFWD}${LOCAL_PORTPUB}${REMOTE_PFWD} <<"; fi
 ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_LOCALPFWD}${LOCAL_PORTPUB}${REMOTE_PFWD} << EOF
