@@ -21,7 +21,7 @@ if [ "${REMOTE_SETUP}" = "true" ]; then
     fi
 EOF
   echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Passing Key to Local..."
-  if [ ${LOCAL_HOST} = "~" ] || [ "${LOCAL_OPEN}" = "true" ]; then echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
+  if [ "${LOCAL_HOST}" = "~" ] || [ "${LOCAL_OPEN}" != "true" ]; then echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
   else
     ${CMD_SCP} ${COMMON_OPT} -o Port=${REMOTE_PORT} -i ${SETUP_KEY} ${KEY} ${LOCAL_USER}@${LOCAL_HOST}:${KEY_NAME:-lantis}.key
     ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} << EOF
