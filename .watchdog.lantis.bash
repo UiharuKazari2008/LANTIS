@@ -12,11 +12,11 @@ if [ "${REMOTE_SETUP}" = "true" ]; then
   echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Passing Key to End-Point..."
   ${CMD_SCP} ${COMMON_OPT} -o Port=${REMOTE_PORT:-22} -i ${SETUP_KEY} ${KEY} ${REMOTE_USER:-root}@${REMOTE_HOST}:${KEY_NAME:-lantis}.key
   ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER:-root} -p ${REMOTE_PORT:-22} -i ${KEY} ${COMMON_OPT} << EOF
-    if grep -Fxq "$(cat ${KEY_NAME:-lantis}.key.pub)" ~/.ssh/authorized_keys
+    if grep -Fxq "$(cat ${KEY}.pub)" ~/.ssh/authorized_keys
     then
       echo "LANTIS Key Present"
     else
-      echo "$(cat ${KEY_NAME:-lantis}.key.pub)" >> ~/.ssh/authorized_keys
+      echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
     fi
 EOF
   echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Passing Key to Source..."
@@ -25,11 +25,11 @@ EOF
   else
     ${CMD_SCP} ${COMMON_OPT} -o Port=${LOCAL_PORT:-22} -i ${SETUP_KEY} ${KEY} ${LOCAL_USER:-root}@${LOCAL_HOST:-127.0.0.1}:${KEY_NAME:-lantis}.key
     ${CMD_SSH} ${LOCAL_HOST:-127.0.0.1} -l ${LOCAL_USER:-root} -p ${LOCAL_PORT:-22} -i ${KEY} ${COMMON_OPT} << EOF
-    if grep -Fxq "$(cat ${KEY_NAME:-lantis}.key.pub)" ~/.ssh/authorized_keys
+    if grep -Fxq "$(cat ${KEY}.pub)" ~/.ssh/authorized_keys
     then
       echo "LANTIS Key Present"
     else
-      echo "$(cat ${KEY_NAME:-lantis}.key.pub)" >> ~/.ssh/authorized_keys
+      echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
     fi
 EOF
   fi
