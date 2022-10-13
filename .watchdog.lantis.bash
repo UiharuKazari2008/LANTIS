@@ -7,8 +7,37 @@ ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON
 echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Outbound End-Point: OK"
 EOF
 }
+KEY_EXCHANGE () {
+if [ ${REMOTE_SETUP} -eq 1 ]; then
+  echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Passing Key to End-Point..."
+  ${CMD_SCP} ${COMMON_OPT} -o Port=${REMOTE_PORT} ${SETUP_KEY} ${REMOTE_USER}@${REMOTE_HOST}:${KEY}
+  ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${SETUP_KEY} ${COMMON_OPT} << EOF
+    if grep -Fxq "$(cat ${KEY}.pub)" ~/.ssh/authorized_keys
+    then
+      echo "LANTIS Key Present"
+    else
+      echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
+    fi
+EOF
+  echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Passing Key to Local..."
+  if [ ${LOCAL_HOST} = "~" ] || [ ${LOCAL_OPEN} -eq 0 ]; then echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
+  else
+    ${CMD_SCP} ${COMMON_OPT} -o Port=${REMOTE_PORT} ${SETUP_KEY} ${LOCAL_USER}@${LOCAL_HOST}:${KEY}
+    ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${SETUP_KEY} ${COMMON_OPT} << EOF
+    if grep -Fxq "$(cat ${KEY}.pub)" ~/.ssh/authorized_keys
+    then
+      echo "LANTIS Key Present"
+    else
+      echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
+    fi
+EOF
+  fi
+  echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Key Exchange Complete"
+fi
+}
 TEST_HOST_FAILED () { 
 echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][ERR!] Outbound End-Point: No Access"
+KEY_EXCHANGE;
 }
 TEST_INET_VERIFY () {
 wget -q --spider ${HOST_VERIFY} --timeout=${TIMEOUT_VERIFY_INET}
@@ -29,23 +58,7 @@ echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][ERR!] Connection was lost!"
 sleep ${TIME_FAILED_CONN}
 }
 LINK () {
-if [ ${REMOTE_SETUP} -eq 1 ]; then
-	echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Passing Key to End-Point..."
-	${CMD_SCP} ${COMMON_OPT} -o Port=${REMOTE_PORT} ${KEY} ${REMOTE_USER}@${REMOTE_HOST}:${KEY}
-	${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${SETUP_KEY} ${COMMON_OPT} << EOF
-		echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
-EOF
-	echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Passing Key to Local..."
-	if [ ${LOCAL_HOST} = "~" ] || [ ${LOCAL_OPEN} -eq 0 ]; then echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
-	else
-		${CMD_SCP} ${COMMON_OPT} -o Port=${REMOTE_PORT} ${KEY} ${LOCAL_USER}@${LOCAL_HOST}:${KEY}
-		${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${SETUP_KEY} ${COMMON_OPT} << EOF
-		echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
-EOF
-	fi
-	echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Key Exchange Complete"
-fi
-
+KEY_EXCHANGE;
 if [ ${LOCAL_OPEN} -eq 0 ]; then # Use Reverse SSH Tunneling
 	REMOTE_PFWD="-R ${REMOTE_LPORT:-65100}:127.0.0.1:${LOCAL_PORT:-22}"; LOCAL_HOST="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Reverse Conection will be used"
 elif [ ${LOCAL_OPEN} -eq 1 ]; then # Use Direct Connection
