@@ -7,7 +7,6 @@ ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER:-root} -p ${REMOTE_PORT:-22} -i ${KEY
 echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Outbound End-Point: OK"
 EOF
 }
-KEYEXCOMPLETED=0
 KEY_EXCHANGE () {
 if [ "${REMOTE_SETUP}" = "true" ]; then
   echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Passing Key to End-Point..."
@@ -21,9 +20,10 @@ if [ "${REMOTE_SETUP}" = "true" ]; then
     fi
 EOF
   echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Passing Key to Local..."
-  if [ "${LOCAL_HOST:-127.0.0.1}" = "~" ] || [ "${LOCAL_OPEN}" != "true" ]; then echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
+  if [ "${LOCAL_HOST:-127.0.0.1}" = "127.0.0.2" ] || [ "${LOCAL_HOST:-127.0.0.1}" = "localhost" ]; then
+    echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
   else
-    ${CMD_SCP} ${COMMON_OPT} -o Port=${REMOTE_PORT:-22} -i ${SETUP_KEY} ${KEY} ${LOCAL_USER:-root}@${LOCAL_HOST:-127.0.0.1}:${KEY}.key
+    ${CMD_SCP} ${COMMON_OPT} -o Port=${REMOTE_PORT:-22} -i ${SETUP_KEY} ${KEY} ${LOCAL_USER:-root}@${LOCAL_HOST:-127.0.0.1}:${KEY_NAME:-lantis}.key
     ${CMD_SSH} ${LOCAL_HOST:-127.0.0.1} -l ${LOCAL_USER:-root} -p ${LOCAL_PORT:-22} -i ${KEY} ${COMMON_OPT} << EOF
     if grep -Fxq "$(cat ${KEY}.pub)" ~/.ssh/authorized_keys
     then
@@ -34,12 +34,12 @@ EOF
 EOF
   fi
   echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Key Exchange Complete"
-  KEYEXCOMPLETED=1
 fi
 }
 TEST_HOST_FAILED () { 
 echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][ERR!] Outbound End-Point: No Access"
 KEY_EXCHANGE;
+CONNFAILED=1
 }
 TEST_INET_VERIFY () {
 wget -q --spider ${HOST_VERIFY} --timeout=${TIMEOUT_VERIFY_INET}
@@ -60,7 +60,7 @@ echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][ERR!] Connection was lost!"
 sleep ${TIME_FAILED_CONN}
 }
 LINK () {
-if [ ${KEYEXCOMPLETED} -eq 0 ]; then KEY_EXCHANGE; fi;
+KEY_EXCHANGE;
 if [ "${LOCAL_OPEN}" = "true" ]; then # Use Reverse SSH Tunneling
 	REMOTE_PFWD="-R ${REMOTE_LPORT:-65100}:127.0.0.1:${LOCAL_PORT:-22}"; LOCAL_HOST="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Reverse Conection will be used"
 else # Use Direct Connection
