@@ -3,7 +3,7 @@ if [ $# -lt 1 ]; then echo "No Input Data"; exit 1; fi
 # LANTIS EasyLink 4 #
 # OPERATIONS ###########################################################################################################
 TEST_HOST_VERIFY () { 
-${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} << EOF
+${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER:-root} -p ${REMOTE_PORT:-22} -i ${KEY} ${COMMON_OPT} << EOF
 echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Outbound End-Point: OK"
 EOF
 }
@@ -11,8 +11,8 @@ KEYEXCOMPLETED=0
 KEY_EXCHANGE () {
 if [ "${REMOTE_SETUP}" = "true" ]; then
   echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Passing Key to End-Point..."
-  ${CMD_SCP} ${COMMON_OPT} -o Port=${REMOTE_PORT} -i ${SETUP_KEY} ${KEY} ${REMOTE_USER}@${REMOTE_HOST}:${KEY_NAME:-lantis}.key
-  ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} << EOF
+  ${CMD_SCP} ${COMMON_OPT} -o Port=${REMOTE_PORT:-22} -i ${SETUP_KEY} ${KEY} ${REMOTE_USER:-root}@${REMOTE_HOST}:${KEY_NAME:-lantis}.key
+  ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER:-root} -p ${REMOTE_PORT:-22} -i ${KEY} ${COMMON_OPT} << EOF
     if grep -Fxq "$(cat ${KEY}.pub)" ~/.ssh/authorized_keys
     then
       echo "LANTIS Key Present"
@@ -21,10 +21,10 @@ if [ "${REMOTE_SETUP}" = "true" ]; then
     fi
 EOF
   echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Passing Key to Local..."
-  if [ "${LOCAL_HOST}" = "~" ] || [ "${LOCAL_OPEN}" != "true" ]; then echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
+  if [ "${LOCAL_HOST:-127.0.0.1}" = "~" ] || [ "${LOCAL_OPEN}" != "true" ]; then echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
   else
-    ${CMD_SCP} ${COMMON_OPT} -o Port=${REMOTE_PORT} -i ${SETUP_KEY} ${KEY} ${LOCAL_USER}@${LOCAL_HOST}:${KEY}.key
-    ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} << EOF
+    ${CMD_SCP} ${COMMON_OPT} -o Port=${REMOTE_PORT:-22} -i ${SETUP_KEY} ${KEY} ${LOCAL_USER:-root}@${LOCAL_HOST:-127.0.0.1}:${KEY}.key
+    ${CMD_SSH} ${LOCAL_HOST:-127.0.0.1} -l ${LOCAL_USER:-root} -p ${LOCAL_PORT:-22} -i ${KEY} ${COMMON_OPT} << EOF
     if grep -Fxq "$(cat ${KEY}.pub)" ~/.ssh/authorized_keys
     then
       echo "LANTIS Key Present"
@@ -64,17 +64,17 @@ if [ ${KEYEXCOMPLETED} -eq 0 ]; then KEY_EXCHANGE; fi;
 if [ "${LOCAL_OPEN}" = "true" ]; then # Use Reverse SSH Tunneling
 	REMOTE_PFWD="-R ${REMOTE_LPORT:-65100}:127.0.0.1:${LOCAL_PORT:-22}"; LOCAL_HOST="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Reverse Conection will be used"
 else # Use Direct Connection
-	REMOTE_LPORT="${LOCAL_PORT:-22}"; REMOTE_PFWD="";	if [ ${LOCAL_HOST} = "~" ]; then LOCAL_HOST="$(curl ipinfo.io/ip 2> /dev/null)"; fi; fi
+	REMOTE_LPORT="${LOCAL_PORT:-22}"; REMOTE_PFWD="";	if [ ${LOCAL_HOST:-127.0.0.1} = "~" ]; then LOCAL_HOST="$(curl ipinfo.io/ip 2> /dev/null)"; fi; fi
 echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO][>>>] Establishing Control..." 
-if [ ${DRY} -eq 1 ]; then echo "${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_LOCALPFWD} ${LOCAL_PORTPUB} ${REMOTE_PFWD} <<"; fi
-${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_LOCALPFWD} ${LOCAL_PORTPUB} ${REMOTE_PFWD} << EOF
+if [ ${DRY} -eq 1 ]; then echo "${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER:-root} -p ${REMOTE_PORT:-22} -i ${KEY} ${COMMON_OPT} ${REMOTE_LOCALPFWD} ${LOCAL_PORTPUB} ${REMOTE_PFWD} <<"; fi
+${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER:-root} -p ${REMOTE_PORT:-22} -i ${KEY} ${COMMON_OPT} ${REMOTE_LOCALPFWD} ${LOCAL_PORTPUB} ${REMOTE_PFWD} << EOF
 	if [ ${1} = 1 ]; then
 	  if [ ! -f "${KEY_NAME:-lantis}.key" ]; then echo "MISSING KEY" && exit 1; fi
 		if [ "${REMOTE_KILL}" = "true" ]; then netstat -tlpn | grep ":${REMOTE_FWDPORT} " | sed -n 's@.* \([0-9]*\)/.*@kill \1@p' | sh > /dev/null; fi
 		echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO][<<<] Linked!"; pkill -f "^${CMD_SSH}.*${LOCAL_PFWD_LAST}$" > /dev/null
     ${CONNECT_REMOTE_COMMANDS:-}
-		if [ ${DRY} -eq 1 ]; then echo "${LOCAL_USER}@${LOCAL_HOST}:${REMOTE_LPORT} -i ${KEY_NAME:-lantis}.key ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} ${LOCAL_PFWD}"; else
-		${CMD_SSH} ${LOCAL_HOST} -l ${LOCAL_USER} -p ${REMOTE_LPORT} -i ${KEY_NAME:-lantis}.key ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} ${LOCAL_PFWD}; fi
+		if [ ${DRY} -eq 1 ]; then echo "${LOCAL_USER:-root}@${LOCAL_HOST:-127.0.0.1}:${REMOTE_LPORT} -i ${KEY_NAME:-lantis}.key ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} ${LOCAL_PFWD}"; else
+		${CMD_SSH} ${LOCAL_HOST:-127.0.0.1} -l ${LOCAL_USER:-root} -p ${REMOTE_LPORT} -i ${KEY_NAME:-lantis}.key ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} ${LOCAL_PFWD}; fi
 		echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][ERR!][<<<] ETOL"
 		${DROPPED_REMOTE_COMMANDS:-}
 	elif [ ${1} = 2 ]; then
