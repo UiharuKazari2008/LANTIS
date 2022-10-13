@@ -92,9 +92,9 @@ CMD_SSH="ssh"; CMD_SCP="scp"; KEY=lantis.key; SETUP_KEY="$HOME/.ssh/id_rsa"; LOC
 COMMON_OPT="-C -2 -o BatchMode=yes -o StrictHostKeyChecking=no -o TCPKeepAlive=yes -o ServerAliveInterval=5 -o ConnectTimeout=15 -o LogLevel=Error"
 source ./.watchdog.lantis.config
 # PARSE INPUT ##########################################################################################################
-while getopts "m:c:n:X" opt; do
+while getopts "m:c:n:X:" opt; do
   case $opt in
-  	X) DRY=1;;
+  	X) DRY=${OPTARG};;
   	m) OPER_MODE=${OPTARG};;
     n) CONNECTION_NAME=${OPTARG};;
     c) FILENAME="${OPTARG}";;
@@ -104,6 +104,7 @@ while getopts "m:c:n:X" opt; do
 done
 # MAIN RUNTIME #########################################################################################################
 source $FILENAME
+echo $FILENAME
 # Port List Converter
 if [ -n "${FORWARD_PORTS}" ]; then
   for _PORT_SET in ${FORWARD_PORTS}; do

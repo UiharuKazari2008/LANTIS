@@ -83,7 +83,7 @@ FORKER () {
       bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} -m ${2} -X ${DRY} -c "${1}";
     else
       pkill -f "^bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} *." > /dev/null;
-      nohup bash ./.watchdog.lantis.bash -n "${CONNECTION_NAME}"  -m ${2} -X ${DRY} -c "${1}" >> "${LOG_FILE}" &
+      nohup bash ./.watchdog.lantis.bash -n "${CONNECTION_NAME}" -m ${2} -X ${DRY} -c "${1}" >> "${LOG_FILE}" &
     fi
     sleep $(if [ ${2} = 1 ]; then echo "${TIME_LAUNCH_PAUSE}"; elif [ ${2} = 2 ]; then echo "${TIME_DROP_PAUSE}"; fi);
   fi
@@ -108,8 +108,8 @@ while getopts "C:XLl:Kk:Z" opt; do
     l) WATCHDOG 1 ${OPTARG};;
     K) HEADER; WATCHDOG 2;;
     k) WATCHDOG 2 ${OPTARG};;
-      Z) HEADER; SETUPGUIDE; exit 0;;
-      \?) echo "[PEBKAC] WTF is -$OPTARG?, thats not a accepted option, Abort"; USAGE; exit 1;;
-      :) echo "[PEBKAC] -$OPTARG requires an argument, Abort"; USAGE; exit 1;;
+    Z) HEADER; SETUPGUIDE; exit 0;;
+    \?) echo "[PEBKAC] WTF is -$OPTARG?, thats not a accepted option, Abort"; USAGE; exit 1;;
+    :) echo "[PEBKAC] -$OPTARG requires an argument, Abort"; USAGE; exit 1;;
   esac
 done
