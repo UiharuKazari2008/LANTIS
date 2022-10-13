@@ -7,6 +7,7 @@ ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON
 echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Outbound End-Point: OK"
 EOF
 }
+KEYEXCOMPLETED=0
 KEY_EXCHANGE () {
 if [ ${REMOTE_SETUP} -eq 1 ]; then
   echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Passing Key to End-Point..."
@@ -33,6 +34,7 @@ EOF
 EOF
   fi
   echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Key Exchange Complete"
+  KEYEXCOMPLETED=1
 fi
 }
 TEST_HOST_FAILED () { 
@@ -58,20 +60,20 @@ echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][ERR!] Connection was lost!"
 sleep ${TIME_FAILED_CONN}
 }
 LINK () {
-KEY_EXCHANGE;
+if [ ${KEYEXCOMPLETED} -eq 0 ]; then KEY_EXCHANGE; fi;
 if [ ${LOCAL_OPEN} -eq 0 ]; then # Use Reverse SSH Tunneling
 	REMOTE_PFWD="-R ${REMOTE_LPORT:-65100}:127.0.0.1:${LOCAL_PORT:-22}"; LOCAL_HOST="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Reverse Conection will be used"
 elif [ ${LOCAL_OPEN} -eq 1 ]; then # Use Direct Connection
 	REMOTE_LPORT="${LOCAL_PORT:-22}"; REMOTE_PFWD="";	if [ ${LOCAL_HOST} = "~" ]; then LOCAL_HOST="$(curl ipinfo.io/ip 2> /dev/null)"; fi; fi
 echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO][>>>] Establishing Control..." 
-echo "${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_LOCALPFWD} ${LOCAL_PORTPUB} ${REMOTE_PFWD} <<"
+if [ ${DRY} -eq 1 ]; then echo "${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_LOCALPFWD} ${LOCAL_PORTPUB} ${REMOTE_PFWD} <<"; fi
 ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_LOCALPFWD} ${LOCAL_PORTPUB} ${REMOTE_PFWD} << EOF
 	if [ ${1} = 1 ]; then
 	  if [ ! -f "${KEY}" ]; then echo "MISSING KEY" && exit 1; fi
 		if [ ${REMOTE_KILL} -eq 1 ]; then netstat -tlpn | grep ":${REMOTE_FWDPORT} " | sed -n 's@.* \([0-9]*\)/.*@kill \1@p' | sh > /dev/null; fi
 		echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO][<<<] Linked!"; pkill -f "^${CMD_SSH}.*${LOCAL_PFWD_LAST}$" > /dev/null
-		echo "${LOCAL_USER}@${LOCAL_HOST}:${REMOTE_LPORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} ${LOCAL_PFWD}"
-		if [ ${DRY} -eq 0 ]; then ${CMD_SSH} ${LOCAL_HOST} -l ${LOCAL_USER} -p ${REMOTE_LPORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} ${LOCAL_PFWD}; fi
+		if [ ${DRY} -eq 1 ]; then echo "${LOCAL_USER}@${LOCAL_HOST}:${REMOTE_LPORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} ${LOCAL_PFWD}"; else
+		${CMD_SSH} ${LOCAL_HOST} -l ${LOCAL_USER} -p ${REMOTE_LPORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} ${LOCAL_PFWD}; fi
 		echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][ERR!][<<<] ETOL"
 	elif [ ${1} = 2 ]; then
 		echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO][<<<] Dropping...!"
