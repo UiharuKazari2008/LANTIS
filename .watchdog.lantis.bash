@@ -23,7 +23,7 @@ EOF
   if [ "${LOCAL_HOST:-127.0.0.1}" = "127.0.0.2" ] || [ "${LOCAL_HOST:-127.0.0.1}" = "localhost" ]; then
     echo "$(cat ${KEY}.pub)" >> ~/.ssh/authorized_keys
   else
-    ${CMD_SCP} ${COMMON_OPT} -o Port=${REMOTE_PORT:-22} -i ${SETUP_KEY} ${KEY} ${LOCAL_USER:-root}@${LOCAL_HOST:-127.0.0.1}:${KEY_NAME:-lantis}.key
+    ${CMD_SCP} ${COMMON_OPT} -o Port=${LOCAL_PORT:-22} -i ${SETUP_KEY} ${KEY} ${LOCAL_USER:-root}@${LOCAL_HOST:-127.0.0.1}:${KEY_NAME:-lantis}.key
     ${CMD_SSH} ${LOCAL_HOST:-127.0.0.1} -l ${LOCAL_USER:-root} -p ${LOCAL_PORT:-22} -i ${KEY} ${COMMON_OPT} << EOF
     if grep -Fxq "$(cat ${KEY}.pub)" ~/.ssh/authorized_keys
     then
@@ -104,7 +104,6 @@ while getopts "m:c:n:X:" opt; do
 done
 # MAIN RUNTIME #########################################################################################################
 source $FILENAME
-echo $FILENAME
 # Port List Converter
 if [ -n "${FORWARD_PORTS}" ]; then
   for _PORT_SET in ${FORWARD_PORTS}; do
