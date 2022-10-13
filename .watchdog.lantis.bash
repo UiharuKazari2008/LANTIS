@@ -9,7 +9,6 @@ EOF
 }
 TEST_HOST_FAILED () { 
 echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][ERR!] Outbound End-Point: No Access"
-echo "${REMOTE_SETUP}"
 if [ ${REMOTE_SETUP} -eq 1 ]; then
 	echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Passing Key to End-Point..."
 	${CMD_SCP} ${COMMON_OPT} -o Port=${REMOTE_PORT} ${KEY} ${REMOTE_USER}@${REMOTE_HOST}:${KEY}
@@ -72,7 +71,7 @@ CMD_SSH="ssh"; CMD_SCP="scp"; KEY=lantis.key; SETUP_KEY="$HOME/.ssh/id_rsa"; LOC
 COMMON_OPT="-C -2 -o BatchMode=yes -o StrictHostKeyChecking=no -o TCPKeepAlive=yes -o ServerAliveInterval=5 -o ConnectTimeout=15 -o LogLevel=Error"
 source ./.watchdog.lantis.config
 # PARSE INPUT ##########################################################################################################
-while getopts "m:n:h:p:q:u:H:P:U:D:L:d:lSRKX" opt; do
+while getopts "m:n:h:p:q:u:H:P:U:D:d:LlSRKX" opt; do
   case $opt in
   	m) OPER_MODE=${OPTARG};;
     n) CONNECTION_NAME=${OPTARG};;
