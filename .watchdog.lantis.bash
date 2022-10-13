@@ -9,6 +9,7 @@ EOF
 }
 TEST_HOST_FAILED () { 
 echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][ERR!] Outbound End-Point: No Access"
+echo "${REMOTE_SETUP}"
 if [ ${REMOTE_SETUP} -eq 1 ]; then
 	echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Passing Key to End-Point..."
 	${CMD_SCP} ${COMMON_OPT} -o Port=${REMOTE_PORT} ${KEY} ${REMOTE_USER}@${REMOTE_HOST}:${KEY}
