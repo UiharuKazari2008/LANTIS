@@ -67,7 +67,8 @@ REMOTE_KILL="true"
 LOCAL_OPEN="true"
 
 LOCAL_USER="root"
-LOCAL_PORT="65401"
+LOCAL_PORT="22"
+REMOTE_LPORT="65401"
 
 FORWARD_PORTS="8989:127.0.0.1:3000"
 FORWARD_PUBLIC="true"
@@ -79,6 +80,7 @@ FORWARD_PUBLIC="true"
 * Remote Kill Enabled
   - Any thing using the ports that are forwarded will be killed
 * Reverse Connection Enabled
+  - Local port 65401 will be used for the SSH connection back to local host 
   - Control connection will be established, then a connection back to your local host will be established to forward the ports
 * Port 8989 will be forwarded to 127.0.0.1:3000
 * Ports will be open to 0.0.0.0
@@ -96,7 +98,8 @@ REMOTE_KILL="true"
 LOCAL_OPEN="true"
 
 LOCAL_USER="root"
-LOCAL_PORT="65401"
+LOCAL_PORT="22"
+REMOTE_LPORT="65401"
 
 FORWARD_PORTS="8989:127.0.0.1:3000"
 REVERSE_PORTS="9357:127.0.0.1:357"
@@ -110,6 +113,7 @@ REVERSE_PUBLIC="true"
 * Remote Kill Enabled
   - Any thing using the ports that are forwarded will be killed
 * Reverse Connection Enabled
+  - Local port 65401 will be used for the SSH connection back to local host
   - Control connection will be established, then a connection back to your local host will be established to forward the ports
 * Remote Host: Port 8989 will be forwarded to 127.0.0.1:3000
 * Local Host: Remote hosts port 357 will be available as port 9357
@@ -130,7 +134,7 @@ LOCAL_OPEN="false"
 #LOCAL_HOST="1.2.3.4"
 LOCAL_HOST="~"
 LOCAL_USER="root"
-LOCAL_PORT="65401"
+LOCAL_PORT="22"
 
 FORWARD_PORTS="8989:127.0.0.1:3000 5000:127.0.0.1:5000"
 FORWARD_PUBLIC="true"
@@ -172,6 +176,8 @@ LOCAL_HOST=""
 LOCAL_PORT=""
 # Local Hosts SSH Username
 LOCAL_USER=""
+# Remote Port that will be used for the connection to the local host
+REMOTE_LPORT=""
 # Space delimited list of ports to forward
 # REMOTE_PORT:LOCAL_HOST:LOCAL_PORT
 FORWARD_PORTS=""

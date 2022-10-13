@@ -46,17 +46,17 @@ sleep ${TIME_FAILED_CONN}
 }
 LINK () {
 if [ ${LOCAL_OPEN} -eq 0 ]; then # Use Reverse SSH Tunneling
-	REMOTE_PFWD="-R ${LOCAL_PORT}:127.0.0.1:22"; LOCAL_HOST="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Reverse Conection will be used"
+	REMOTE_PFWD="-R ${REMOTE_LPORT:=65100}:127.0.0.1:${LOCAL_PORT:=22}"; LOCAL_HOST="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Reverse Conection will be used"
 elif [ ${LOCAL_OPEN} -eq 1 ]; then # Use Direct Connection
-	REMOTE_PFWD="";	if [ ${LOCAL_HOST} = "~" ]; then LOCAL_HOST="$(curl ipinfo.io/ip 2> /dev/null)"; fi; fi
+	REMOTE_LPORT="${LOCAL_PORT:=22}"; REMOTE_PFWD="";	if [ ${LOCAL_HOST} = "~" ]; then LOCAL_HOST="$(curl ipinfo.io/ip 2> /dev/null)"; fi; fi
 echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO][>>>] Establishing Control..." 
 if [ ${DRY} -eq 1 ]; then echo "${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_LOCALPFWD}${LOCAL_PORTPUB}${REMOTE_PFWD} <<"; fi
 ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER} -p ${REMOTE_PORT} -i ${KEY} ${COMMON_OPT} ${REMOTE_LOCALPFWD}${LOCAL_PORTPUB}${REMOTE_PFWD} << EOF
 	if [ ${1} = 1 ]; then
 		if [ ${REMOTE_KILL} -eq 1 ]; then netstat -tlpn | grep ":${REMOTE_FWDPORT} " | sed -n 's@.* \([0-9]*\)/.*@kill \1@p' | sh > /dev/null; fi
 		echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO][<<<] Linked!"; pkill -f "^${CMD_SSH}.*${LOCAL_PFWD_LAST}$" > /dev/null
-		if [ ${DRY} -eq 1 ]; then echo "${LOCAL_USER}@${LOCAL_HOST}:${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} ${LOCAL_PFWD}"
-		else ${CMD_SSH} ${LOCAL_HOST} -l ${LOCAL_USER} -p ${LOCAL_PORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} ${LOCAL_PFWD}; fi
+		if [ ${DRY} -eq 1 ]; then echo "${LOCAL_USER}@${LOCAL_HOST}:${REMOTE_LPORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} ${LOCAL_PFWD}"
+		else ${CMD_SSH} ${LOCAL_HOST} -l ${LOCAL_USER} -p ${REMOTE_LPORT} -i ${KEY} ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} ${LOCAL_PFWD}; fi
 		echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][ERR!][<<<] ETOL"
 	elif [ ${1} = 2 ]; then
 		echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO][<<<] Dropping...!"
@@ -71,7 +71,7 @@ CMD_SSH="ssh"; CMD_SCP="scp"; KEY=lantis.key; SETUP_KEY="$HOME/.ssh/id_rsa"; LOC
 COMMON_OPT="-C -2 -o BatchMode=yes -o StrictHostKeyChecking=no -o TCPKeepAlive=yes -o ServerAliveInterval=5 -o ConnectTimeout=15 -o LogLevel=Error"
 source ./.watchdog.lantis.config
 # PARSE INPUT ##########################################################################################################
-while getopts "m:n:h:p:u:H:P:U:D:L:d:lSRKX" opt; do
+while getopts "m:n:h:p:q:u:H:P:U:D:L:d:lSRKX" opt; do
   case $opt in
   	m) OPER_MODE=${OPTARG};;
     n) CONNECTION_NAME=${OPTARG};;
@@ -80,6 +80,7 @@ while getopts "m:n:h:p:u:H:P:U:D:L:d:lSRKX" opt; do
     u) REMOTE_USER=${OPTARG};;
     H) LOCAL_HOST=${OPTARG};;
     P) LOCAL_PORT=${OPTARG};;
+    q) REMOTE_LPORT=${OPTARG};;
     U) LOCAL_USER=${OPTARG};;
     D) LOCAL_PFWD="${LOCAL_PFWD}-L ${OPTARG} "; LOCAL_PFWD_LAST=${OPTARG};;
     d) REMOTE_LOCALPFWD="${REMOTE_LOCALPFWD}-L ${OPTARG} "; REMOTE_LOCALPFWD_LAST=${OPTARG};;

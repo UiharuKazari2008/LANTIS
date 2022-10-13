@@ -123,6 +123,7 @@ FORKER () {
     if [ ${REMOTE_SETUP:=false} = "true" ]; then EXTRA_OPT="${EXTRA_OPT}-S "; fi
     if [ ${LOCAL_OPEN:=false} = "true" ]; then EXTRA_OPT="${EXTRA_OPT}-R "; fi
     if [ ${REMOTE_KILL:=false} = "true" ]; then EXTRA_OPT="${EXTRA_OPT}-K "; fi
+    if [ -n "${REMOTE_LPORT}" ]; then EXTRA_OPT="${EXTRA_OPT}-q ${REMOTE_LPORT}"; fi
 
     if [ ${DRY} -eq 1 ]; then
       echo "./.watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT:=22} -u ${REMOTE_USER:=root} \
