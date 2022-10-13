@@ -118,11 +118,11 @@ FORKER () {
       done;
     fi;
     # Option Selector
-    if [ ${FORWARD_PUBLIC:=false} = "true" ]; then EXTRA_OPT="${EXTRA_OPT}-L "; fi
-    if [ ${REVERSE_PUBLIC:=false} = "true" ] && [ "${2}" = "1" ]; then EXTRA_OPT="${EXTRA_OPT}-l "; fi
-    if [ ${REMOTE_SETUP:=false} = "true" ]; then EXTRA_OPT="${EXTRA_OPT}-S "; fi
-    if [ ${LOCAL_OPEN:=false} = "true" ]; then EXTRA_OPT="${EXTRA_OPT}-R "; fi
-    if [ ${REMOTE_KILL:=false} = "true" ]; then EXTRA_OPT="${EXTRA_OPT}-K "; fi
+    if [ "${FORWARD_PUBLIC}" = "true" ]; then EXTRA_OPT="${EXTRA_OPT}-L "; fi
+    if [ "${REVERSE_PUBLIC}" = "true" ] && [ "${2}" = "1" ]; then EXTRA_OPT="${EXTRA_OPT}-l "; fi
+    if [ "${REMOTE_SETUP}" = "true" ]; then EXTRA_OPT="${EXTRA_OPT}-S "; fi
+    if [ "${LOCAL_OPEN}" = "true" ]; then EXTRA_OPT="${EXTRA_OPT}-R "; fi
+    if [ "${REMOTE_KILL}" = "true" ]; then EXTRA_OPT="${EXTRA_OPT}-K "; fi
     if [ -n "${REMOTE_LPORT}" ]; then EXTRA_OPT="${EXTRA_OPT}-q ${REMOTE_LPORT}"; fi
 
     if [ ${DRY} -eq 1 ]; then

@@ -67,7 +67,7 @@ if [ ${DRY} -eq 1 ]; then exit 0; fi
 # SET VARS #############################################################################################################
 REMOTE_PORTPUB=""; LOCAL_PORTPUB=""; DRY=0; LOCAL_OPEN=1; REMOTE_KILL=0; REMOTE_SETUP=0; LOOPCON=1; LOCAL_PFWD=""; REMOTE_LOCALPFWD="";
 TIME_FAILED_CONN=2; TIME_FAILED_INET=5; TIMEOUT_VERIFY_INET=15; HOST_VERIFY="https://google.com"; DATE_FORMAT='+%d/%m/%Y %H:%M:%S'
-CMD_SSH="ssh -v"; CMD_SCP="scp -v"; KEY=lantis.key; SETUP_KEY="$HOME/.ssh/id_rsa"; LOCAL_OPT="-N -o ExitOnForwardFailure=yes"
+CMD_SSH="ssh"; CMD_SCP="scp"; KEY=lantis.key; SETUP_KEY="$HOME/.ssh/id_rsa"; LOCAL_OPT="-N -o ExitOnForwardFailure=yes"
 COMMON_OPT="-C -2 -o BatchMode=yes -o StrictHostKeyChecking=no -o TCPKeepAlive=yes -o ServerAliveInterval=5 -o ConnectTimeout=15 -o LogLevel=Error"
 source ./.watchdog.lantis.config
 # PARSE INPUT ##########################################################################################################
