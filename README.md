@@ -74,6 +74,9 @@ REMOTE_LPORT="65401"
 
 FORWARD_PORTS="8989:127.0.0.1:3000"
 FORWARD_PUBLIC="true"
+
+CONNECT_REMOTE_COMMANDS="ufw allow 3000/tcp"
+DISCONNECT_REMOTE_COMMANDS="ufw delete allow 3000/tcp"
 ```
 
 * root@X.X.X.X:22 to remote host
@@ -86,6 +89,7 @@ FORWARD_PUBLIC="true"
   - Control connection will be established, then a connection back to your local host will be established to forward the ports
 * Port 8989 will be forwarded to 127.0.0.1:3000
 * Ports will be open to 0.0.0.0
+* On Connection and Disconnection handle UFW rules
 
 #### Bi-Direction Port Forward with Reverse Tunneling (no direct connection):
 ```shell
@@ -191,6 +195,12 @@ FORWARD_PUBLIC=""
 REVERSE_PORTS=""
 # Enable Global Access to ports on local network (0.0.0.0)
 REVERSE_PUBLIC=""
+# On Connection BEFORE port forwarding
+CONNECT_REMOTE_COMMANDS="ufw allow 3000/tcp"
+# On Requested Shutdown of Connection
+DISCONNECT_REMOTE_COMMANDS="ufw delete allow 3000/tcp"
+# On Connection Failure before EOTL
+DROPPED_REMOTE_COMMANDS=""
 ```
 
 ### Config Files
