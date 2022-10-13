@@ -146,7 +146,7 @@ WATCHDOG() {
 DRY=0; CONNECTIONS_FOLDER="./connections"; LOG_FILE="./lantis.log"; TIME_LAUNCH_PAUSE=4; TIME_DROP_PAUSE=2; DATE_FORMAT='+%d/%m/%Y %H:%M:%S'
 source ./.lantis.config
 # MAIN RUNTIME #########################################################################################################
-echo "= LANTIS Router 3 - Academy City Research ========="
+echo "= LANTIS Router 4 - Academy City Research ========="
 echo "[---------][$(date "${DATE_FORMAT}")][ OK ] System Ready"
 # PARSE INPUT ##########################################################################################################
 while getopts "C:XLl:Kk:Z" opt; do 
