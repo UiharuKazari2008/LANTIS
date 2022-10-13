@@ -83,7 +83,7 @@ FORKER () {
       bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} -m ${2} -X ${DRY} -c "${1}";
     else
       pkill -f "^bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} *." > /dev/null;
-      nohup bash ./.watchdog.lantis.bash -n "${CONNECTION_NAME}"  -m ${2} -X ${DRY} -c ${1} >> "${LOG_FILE}" &
+      nohup bash ./.watchdog.lantis.bash -n "${CONNECTION_NAME}"  -m ${2} -X ${DRY} -c "${1}" >> "${LOG_FILE}" &
     fi
     sleep $(if [ ${2} = 1 ]; then echo "${TIME_LAUNCH_PAUSE}"; elif [ ${2} = 2 ]; then echo "${TIME_DROP_PAUSE}"; fi);
   fi
