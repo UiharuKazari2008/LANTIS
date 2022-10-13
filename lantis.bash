@@ -11,7 +11,8 @@ cat << EOF
   / /___/ ___ |/ /|  / / / _/ / ___/ / 
  /_____/_/  |_/_/ |_/ /_/ /___//____/  
  Lain Anonymous NetworkIng System
- by : Academy City Research
+ by : Yukimi Kazari
+      Academy City Research
 
 EOF
 }
@@ -19,7 +20,7 @@ USAGE(){
 cat << EOF
  support : help.lantis.project@acr.moe
 
- LANTIS EasyLink Router 2 - Usage:
+ LANTIS EasyLink Router 4 - Usage:
  
  Launch ================================================================
  -l  Launch a Connecion           -L  Launch ALL Connections
@@ -78,84 +79,70 @@ cat << EOF
  
 EOF
 }
+RESET_VARS() {
+  unset CONNECTION_NAME
+  unset CONTROL_INTERFACE
+  unset ENABLED
+  unset REMOTE_HOST
+  unset REMOTE_PORT
+  unset REMOTE_USER
+  unset REMOTE_SETUP
+  unset REMOTE_KILL
+  unset LOCAL_OPEN
+  unset LOCAL_HOST
+  unset LOCAL_PORT
+  unset LOCAL_USER
+  unset FORWARD_PORTS
+  unset REVERSE_PORTS
+  unset FORWARD_PUBLIC
+  unset REVERSE_PUBLIC
+  unset EXTRA_COMMANDS
+}
 FORKER () {
-echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] $(if [ ${1} = 1 ]; then echo "Launching"; elif [ ${1} = 2 ]; then echo "Dropping"; fi) Connection..."
-if [ ${DRY} -eq 1 ]; then 
-	echo "./.watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
-	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} ${PORT_FWDLN}${EXTRA_OPT}"
-	bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
-	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} ${PORT_FWDLN}${EXTRA_OPT} -m ${1} -X ${DRY}
-else 
-	pkill -f "^bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} *." > /dev/null
-	nohup bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT} -u ${REMOTE_USER} \
-	-H ${LOCAL_HOST} -P ${LOCAL_PORT} -U ${LOCAL_USER} ${PORT_FWDLN}${EXTRA_OPT}-m ${1} &>> ${LOG_FILE} & 
-fi
-sleep $(if [ ${1} = 1 ]; then echo "${TIME_LAUNCH_PAUSE}"; elif [ ${1} = 2 ]; then echo "${TIME_DROP_PAUSE}"; fi)
+  RESET_VARS;
+  # shellcheck disable=SC1090
+  source "${1}";
+  if [ "${ENABLED}" = "true" ] && [ "${2}" = "1" ] || [ "${2}" = "2" ]; then
+    echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] $(if [ "${2}" = 1 ]; then echo "Launching"; elif [ "${2}" = 2 ]; then echo "Dropping"; fi) Connection...";
+    PORT_FWDLN="";
+    EXTRA_OPT="";
+    # Port List Converter
+    if [ -n "${FORWARD_PORTS}" ]; then
+      for _PORT_SET in ${FORWARD_PORTS}; do
+        PORT_FWDLN="${PORT_FWDLN}-D ${_PORT_SET} ";
+      done;
+    fi
+    if [ -n "${REVERSE_PORTS}" ] && [ "${2}" = "1" ]; then
+      for _PORT_SET in ${REVERSE_PORTS}; do
+        PORT_FWDLN="${PORT_FWDLN}-d ${_PORT_SET} ";
+      done;
+    fi;
+    # Option Selector
+    if [ ${FORWARD_PUBLIC:=false} = "true" ]; then EXTRA_OPT="${EXTRA_OPT}-L "; fi
+    if [ ${REVERSE_PUBLIC:=false} = "true" ] && [ "${2}" = "1" ]; then EXTRA_OPT="${EXTRA_OPT}-l "; fi
+    if [ ${REMOTE_SETUP:=false} = "true" ]; then EXTRA_OPT="${EXTRA_OPT}-S "; fi
+    if [ ${LOCAL_OPEN:=false} = "true" ]; then EXTRA_OPT="${EXTRA_OPT}-R "; fi
+    if [ ${REMOTE_KILL:=false} = "true" ]; then EXTRA_OPT="${EXTRA_OPT}-K "; fi
+
+    if [ ${DRY} -eq 1 ]; then
+      echo "./.watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT:=22} -u ${REMOTE_USER:=root} \
+      -H ${LOCAL_HOST:=127.0.0.1} -P ${LOCAL_PORT:=22} -U ${LOCAL_USER:=root} ${PORT_FWDLN}${EXTRA_OPT} -m ${2} -X ${DRY}";
+      bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT:=22} -u ${REMOTE_USER:=root} \
+      -H ${LOCAL_HOST:=127.0.0.1} -P ${LOCAL_PORT:=22} -U ${LOCAL_USER:=root} ${PORT_FWDLN}${EXTRA_OPT} -m ${2} -X ${DRY};
+    else
+      pkill -f "^bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} *." > /dev/null;
+      nohup bash ./.watchdog.lantis.bash -n "${CONNECTION_NAME}" -h "${REMOTE_HOST}" -p "${REMOTE_PORT:=22}" -u "${REMOTE_USER:=root}" -H "${LOCAL_HOST:=127.0.0.1}" -P "${LOCAL_PORT:=22}" -U "${LOCAL_USER:=root}" ${PORT_FWDLN}${EXTRA_OPT} -m "${2}" >> "${LOG_FILE}"&
+    fi
+    sleep $(if [ ${2} = 1 ]; then echo "${TIME_LAUNCH_PAUSE}"; elif [ ${2} = 2 ]; then echo "${TIME_DROP_PAUSE}"; fi);
+  fi
 }
 WATCHDOG() {
-while read in; do
-if [[ $(echo $in | awk -F '[ ]' '{print $1}') != "#" ]]; then
-	if [[ $(echo $in | awk -F '[;]' '{print $1}') = "e" ]] || [[ $(echo $in | awk -F '[;]' '{print $1}') = "d" ]] || [[ $(echo $in | awk -F '[;]' '{print $1}') = "l" ]]; then
-		SKIP=0; EXTRA_OPT=""; 
-		CONNECTION_STATUS=$(echo $in | awk -F '[;]' '{print $1}')  #Enabled[E or D]
-		CONNECTION_NAME=$(echo $in | awk -F '[;]' '{print $2}')    #Name[string]
-		L_REMOTE_HOST=$(echo $in | awk -F '[;]' '{print $3}')      #Remote Host[string]
-		L_REMOTE_PORT=$(echo $in | awk -F '[;]' '{print $4}')      #Remote Port[string]
-		L_REMOTE_USER=$(echo $in | awk -F '[;]' '{print $5}')      #Remote User[string]
-		L_LOCAL_HOST=$(echo $in | awk -F '[;]' '{print $6}')       #Local Host[string]
-		L_LOCAL_PORT=$(echo $in | awk -F '[;]' '{print $7}')       #Local Port[string]
-		L_LOCAL_USER=$(echo $in | awk -F '[;]' '{print $8}')       #Local User[string]
-		L_REMOTE_SETUP=$(echo $in | awk -F '[;]' '{print $9}')     #Remote Setup[strng]
-		L_LOCAL_OPEN=$(echo $in | awk -F '[;]' '{print $10}')      #Bypass NAT[int]
-		L_REMOTE_KILL=$(echo $in | awk -F '[;]' '{print $11}')     #Kill Access[int]
-		REMOTE_FWDPORT=$(echo $in | awk -F '[;]' '{print $12}')    #Server Remote Port[int]
-		L_LOCAL_FWDHOST=$(echo $in | awk -F '[;]' '{print $13}')   #Server Local Host[string]
-		L_LOCAL_FWDPORT=$(echo $in | awk -F '[;]' '{print $14}')   #Server Local Port[int]
-		L_REMOTE_FWDPUB=$(echo $in | awk -F '[;]' '{print $15}')   #Public or Local[P or L]
-		# Read Value in Memory if "^"
-		if [ ${L_REMOTE_HOST}   != "^" ]; then REMOTE_HOST=${L_REMOTE_HOST};     fi
-		if [ ${L_REMOTE_PORT}   != "^" ]; then REMOTE_PORT=${L_REMOTE_PORT};     fi
-		if [ ${L_REMOTE_USER}   != "^" ]; then REMOTE_USER=${L_REMOTE_USER};     fi
-		if [ ${L_LOCAL_HOST}    != "^" ]; then LOCAL_HOST=${L_LOCAL_HOST};       fi
-		if [ ${L_LOCAL_PORT}    != "^" ]; then LOCAL_PORT=${L_LOCAL_PORT};       fi
-		if [ ${L_LOCAL_USER}    != "^" ]; then LOCAL_USER=${L_LOCAL_USER};       fi
-		if [ ${L_REMOTE_SETUP}  != "^" ]; then REMOTE_SETUP=${L_REMOTE_SETUP};   fi
-		if [ ${L_LOCAL_OPEN}    != "^" ]; then LOCAL_OPEN=${L_LOCAL_OPEN};       fi
-		if [ ${L_REMOTE_KILL}   != "^" ]; then REMOTE_KILL=${L_REMOTE_KILL};     fi
-		if [ ${L_LOCAL_FWDHOST} != "^" ]; then LOCAL_FWDHOST=${L_LOCAL_FWDHOST}; fi
-		if [ ${L_LOCAL_FWDPORT} != "^" ]; then LOCAL_FWDPORT=${L_LOCAL_FWDPORT}; fi
-		if [ ${L_REMOTE_FWDPUB} != "^" ]; then REMOTE_FWDPUB=${L_REMOTE_FWDPUB}; fi
-		# Option Selector
-		if [ ${REMOTE_FWDPUB} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT}-L "; fi
-		if [ ${REMOTE_SETUP} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT}-S "; fi
-		if [ ${LOCAL_OPEN} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT}-R "; fi
-		if [ ${REMOTE_KILL} -eq 1 ]; then EXTRA_OPT="${EXTRA_OPT}-K "; fi
-		
-		PORT_FWDLN="-D ${REMOTE_FWDPORT}:${LOCAL_FWDHOST}:${LOCAL_FWDPORT} "
-	elif [[ $(echo $in | awk -F '[;]' '{print $1}') = "^" ]] || [[ $(echo $in | awk -F '[;]' '{print $1}') = ">" ]]; then
-		CONNECTION_STATUS=$(echo $in | awk -F '[;]' '{print $1}') #Enabled[E or D]
-		REMOTE_FWDPORT=$(echo $in | awk -F '[;]' '{print $2}')    #Server Remote Port[int]
-		L_LOCAL_FWDHOST=$(echo $in | awk -F '[;]' '{print $3}')   #Server Local Host[string]
-		L_LOCAL_FWDPORT=$(echo $in | awk -F '[;]' '{print $4}')   #Server Local Port[int]
-		L_REMOTE_FWDPUB=$(echo $in | awk -F '[;]' '{print $5}')   #Public or Local[P or L]
-		
-		if [ ${L_LOCAL_FWDHOST} != "^" ]; then LOCAL_FWDHOST=${L_LOCAL_FWDHOST}; fi
-		if [ ${L_LOCAL_FWDPORT} != "^" ]; then LOCAL_FWDPORT=${L_LOCAL_FWDPORT}; fi
-		if [ ${L_REMOTE_FWDPUB} != "^" ]; then REMOTE_FWDPUB=${L_REMOTE_FWDPUB}; fi
-		
-		PORT_FWDLN="${PORT_FWDLN}-D ${REMOTE_FWDPORT}:${LOCAL_FWDHOST}:${LOCAL_FWDPORT} "
-	fi
-	# Run Selector
-	if   [ ${1} -eq 1 ] && [ ${#} -eq 1 ] && ( [ ${CONNECTION_STATUS} = "e" ] || [ ${CONNECTION_STATUS} = ">" ] ) ; then FORKER ${1}
-	elif [ ${1} -eq 1 ] && [ ${#} -eq 2 ] && ( [ ${CONNECTION_STATUS} = "e" ] || [ ${CONNECTION_STATUS} = ">" ] ) && [ ${CONNECTION_NAME} = "${2}" ]; then FORKER ${1}
-	
-	elif [ ${1} -eq 2 ] && [ ${#} -eq 1 ] && ( [ ${CONNECTION_STATUS} = "e" ] || [ ${CONNECTION_STATUS} = ">" ] ); then FORKER ${1}
-	elif [ ${1} -eq 2 ] && [ ${#} -eq 2 ] && ( [ ${CONNECTION_STATUS} = "e" ] || [ ${CONNECTION_STATUS} = ">" ] ) && [ ${CONNECTION_NAME} = "${2}" ]; then FORKER ${1}; fi
-fi
-done < $PORT_LIST
+  for CONNECTION_FILE in "${CONNECTIONS_FOLDER}"/*.rc; do
+      FORKER "${CONNECTION_FILE}" ${1};
+  done
 }
 # SET VARS #############################################################################################################
-DRY=0; PORT_LIST="./ports.lantis.csv"; LOG_FILE="./lantis.log"; TIME_LAUNCH_PAUSE=4; TIME_DROP_PAUSE=2; DATE_FORMAT='+%d/%m/%Y %H:%M:%S'
+DRY=0; CONNECTIONS_FOLDER="./connections"; LOG_FILE="./lantis.log"; TIME_LAUNCH_PAUSE=4; TIME_DROP_PAUSE=2; DATE_FORMAT='+%d/%m/%Y %H:%M:%S'
 source ./.lantis.config
 # MAIN RUNTIME #########################################################################################################
 echo "= LANTIS Router 3 - Academy City Research ========="
@@ -163,14 +150,14 @@ echo "[---------][$(date "${DATE_FORMAT}")][ OK ] System Ready"
 # PARSE INPUT ##########################################################################################################
 while getopts "C:XLl:Kk:Z" opt; do 
   case $opt in
-  	C) PORT_LIST="${OPTARG}";;
-	X) DRY=1;;
-	L) HEADER; WATCHDOG 1;;
-	l) WATCHDOG 1 ${OPTARG};;
-	K) HEADER; WATCHDOG 2;;
-	k) WATCHDOG 2 ${OPTARG};;
-    Z) HEADER; SETUPGUIDE; exit 0;;
-    \?) echo "[PEBKAC] WTF is -$OPTARG?, thats not a accepted option, Abort"; USAGE; exit 1;;
-    :) echo "[PEBKAC] -$OPTARG requires an argument, Abort"; USAGE; exit 1;;
+  	C) CONNECTIONS_FOLDER="${OPTARG}";;
+    X) DRY=1;;
+    L) HEADER; WATCHDOG 1;;
+    l) WATCHDOG 1 ${OPTARG};;
+    K) HEADER; WATCHDOG 2;;
+    k) WATCHDOG 2 ${OPTARG};;
+      Z) HEADER; SETUPGUIDE; exit 0;;
+      \?) echo "[PEBKAC] WTF is -$OPTARG?, thats not a accepted option, Abort"; USAGE; exit 1;;
+      :) echo "[PEBKAC] -$OPTARG requires an argument, Abort"; USAGE; exit 1;;
   esac
 done
