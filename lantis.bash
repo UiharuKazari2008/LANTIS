@@ -49,33 +49,6 @@ cat << EOF
  2) Add id_rsa.pub to /root /.ssh/authorized_keys on the remote server
  3) Generate a SSH key for LANTIS in your current directory where the script will stay
       [root@local]~/LANTIS ssh-keygen –b 4096 –f lantis.key
- 4) Add the entry to the port list with the setup bit set to 1, run that connection
- 5) You should be fine as long as your destination host allows your default ssh key
-
- CSV File Guide:
- 
- NOTE: You can use "^" to use last value
- NOTE: You can use "~" for Local Host to use your current Public IP (Updated on Connection Drop)
- NOTE: Disabled connections are still read
- NOTE: You can only use Public Ports 1-2014 if you are using Remote User root
- WARN: There is little input verification, make sure you know what your doing
- WARN: You cannot use the same local port when using Bypass NAT
- 
- 1 ) Enable or Disale Connection [e,d]
- 2 ) Connection Name [string.no spaces]
- 3 ) Remote Host [string]
- 4 ) Remote Port [int]
- 5 ) Remote User [string]
- 6 ) Local Host [~ for dynamic ip]
- 7 ) Local Port [int]
- 8 ) Local User [string]
- 9 ) Setup End Point [y or n]
- 10) Bypass Inbound NAT [y or n]
- 11) Hijack Port [y or n]
- 12) Public Server Port [int]
- 13) Local Server Host [string]
- 14) Local Server Port [int]
- 15) Public or Remote Host-Only [p or l]
  
 EOF
 }
@@ -104,35 +77,13 @@ FORKER () {
   source "${1}";
   if [ "${ENABLED}" = "true" ] && [ "${2}" = "1" ] || [ "${2}" = "2" ]; then
     echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] $(if [ "${2}" = 1 ]; then echo "Launching"; elif [ "${2}" = 2 ]; then echo "Dropping"; fi) Connection...";
-    PORT_FWDLN="";
-    EXTRA_OPT="";
-    # Port List Converter
-    if [ -n "${FORWARD_PORTS}" ]; then
-      for _PORT_SET in ${FORWARD_PORTS}; do
-        PORT_FWDLN="${PORT_FWDLN}-D ${_PORT_SET} ";
-      done;
-    fi
-    if [ -n "${REVERSE_PORTS}" ] && [ "${2}" = "1" ]; then
-      for _PORT_SET in ${REVERSE_PORTS}; do
-        PORT_FWDLN="${PORT_FWDLN}-d ${_PORT_SET} ";
-      done;
-    fi;
-    # Option Selector
-    if [ "${FORWARD_PUBLIC}" = "true" ]; then EXTRA_OPT="${EXTRA_OPT}-L "; fi
-    if [ "${REVERSE_PUBLIC}" = "true" ] && [ "${2}" = "1" ]; then EXTRA_OPT="${EXTRA_OPT}-l "; fi
-    if [ "${REMOTE_SETUP}" = "true" ]; then EXTRA_OPT="${EXTRA_OPT}-S "; fi
-    if [ "${LOCAL_OPEN}" = "true" ]; then EXTRA_OPT="${EXTRA_OPT}-R "; fi
-    if [ "${REMOTE_KILL}" = "true" ]; then EXTRA_OPT="${EXTRA_OPT}-K "; fi
-    if [ -n "${REMOTE_LPORT}" ]; then EXTRA_OPT="${EXTRA_OPT}-q ${REMOTE_LPORT}"; fi
 
     if [ ${DRY} -eq 1 ]; then
-      echo "./.watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT:-22} -u ${REMOTE_USER:-root} \
-      -H ${LOCAL_HOST:-127.0.0.1} -P ${LOCAL_PORT:-22} -U ${LOCAL_USER:-root} ${PORT_FWDLN}${EXTRA_OPT} -m ${2} -X ${DRY}";
-      bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} -h ${REMOTE_HOST} -p ${REMOTE_PORT:-22} -u ${REMOTE_USER:-root} \
-      -H ${LOCAL_HOST:-127.0.0.1} -P ${LOCAL_PORT:-22} -U ${LOCAL_USER:-root} ${PORT_FWDLN}${EXTRA_OPT} -m ${2} -X ${DRY};
+      echo "./.watchdog.lantis.bash -n ${CONNECTION_NAME} -m ${2} -X ${DRY} -c ${1}";
+      bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} -m ${2} -X ${DRY} -c "${1}";
     else
       pkill -f "^bash ./.watchdog.lantis.bash -n ${CONNECTION_NAME} *." > /dev/null;
-      nohup bash ./.watchdog.lantis.bash -n "${CONNECTION_NAME}" -h "${REMOTE_HOST}" -p "${REMOTE_PORT:-22}" -u "${REMOTE_USER:-root}" -H "${LOCAL_HOST:-127.0.0.1}" -P "${LOCAL_PORT:-22}" -U "${LOCAL_USER:-root}" ${PORT_FWDLN}${EXTRA_OPT} -m "${2}" >> "${LOG_FILE}"&
+      nohup bash ./.watchdog.lantis.bash -n "${CONNECTION_NAME}"  -m ${2} -X ${DRY} -c ${1} >> "${LOG_FILE}" &;
     fi
     sleep $(if [ ${2} = 1 ]; then echo "${TIME_LAUNCH_PAUSE}"; elif [ ${2} = 2 ]; then echo "${TIME_DROP_PAUSE}"; fi);
   fi
