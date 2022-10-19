@@ -106,12 +106,14 @@ source $FILENAME
 # Port List Converter
 if [ -n "${FORWARD_PORTS}" ]; then
   for _PORT_SET in ${FORWARD_PORTS}; do
+    echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Forwarding Port: ${_PORT_SET}"
     LOCAL_PFWD="${LOCAL_PFWD}-L ${_PORT_SET} ";
     LOCAL_PFWD_LAST=${_PORT_SET};
   done;
 fi
-if [ -n "${REVERSE_PORTS}" ] && [ "${2}" = "1" ]; then
+if [ -n "${REVERSE_PORTS}" ] && [ "${OPER_MODE}" = "1" ]; then
   for _PORT_SET in ${REVERSE_PORTS}; do
+    echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Pulling Port: ${_PORT_SET}"
     REMOTE_LOCALPFWD="${REMOTE_LOCALPFWD}-L ${_PORT_SET} ";
   done;
 fi;
