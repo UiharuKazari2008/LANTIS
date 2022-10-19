@@ -61,28 +61,49 @@ sleep ${TIME_FAILED_CONN}
 }
 LINK () {
 KEY_EXCHANGE;
-if [ "${LOCAL_OPEN}" = "true" ]; then # Use Reverse SSH Tunneling
-	REMOTE_PFWD="-R ${REMOTE_LPORT:-65100}:127.0.0.1:${LOCAL_PORT:-22}"; LOCAL_HOST="127.0.0.1"; echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Reverse Conection will be used"
-else # Use Direct Connection
-	REMOTE_LPORT="${LOCAL_PORT:-22}"; REMOTE_PFWD="";	if [ ${LOCAL_HOST:-127.0.0.1} = "~" ]; then LOCAL_HOST="$(curl ipinfo.io/ip 2> /dev/null)"; fi; fi
-echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO][>>>] Establishing Control..." 
-if [ ${DRY} -eq 1 ]; then echo "${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER:-root} -p ${REMOTE_PORT:-22} -i ${KEY} ${COMMON_OPT} ${REMOTE_LOCALPFWD} ${LOCAL_PORTPUB} ${REMOTE_PFWD} <<"; fi
-${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER:-root} -p ${REMOTE_PORT:-22} -i ${KEY} ${COMMON_OPT} ${REMOTE_LOCALPFWD} ${LOCAL_PORTPUB} ${REMOTE_PFWD} << EOF
-	if [ ${1} = 1 ]; then
-	  if [ ! -f "${KEY_NAME:-lantis}.key" ]; then echo "MISSING KEY" && exit 1; fi
-		if [ "${REMOTE_KILL}" = "true" ]; then netstat -tlpn | grep ":${REMOTE_FWDPORT} " | sed -n 's@.* \([0-9]*\)/.*@kill \1@p' | sh > /dev/null; fi
-		echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO][<<<] Linked!"; pkill -f "^${CMD_SSH}.*${LOCAL_PFWD_LAST}$" > /dev/null
-    ${CONNECT_REMOTE_COMMANDS:-}
-		if [ ${DRY} -eq 1 ]; then echo "${LOCAL_USER:-root}@${LOCAL_HOST:-127.0.0.1}:${REMOTE_LPORT} -i ${KEY_NAME:-lantis}.key ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} ${LOCAL_PFWD}"; else
-		${CMD_SSH} ${LOCAL_HOST:-127.0.0.1} -l ${LOCAL_USER:-root} -p ${REMOTE_LPORT} -i ${KEY_NAME:-lantis}.key ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} ${LOCAL_PFWD}; fi
-		echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][ERR!][<<<] ETOL"
-		${DROPPED_REMOTE_COMMANDS:-}
-	elif [ ${1} = 2 ]; then
-		echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO][<<<] Dropping...!"
-		${DISCONNECT_REMOTE_COMMANDS:-}
-		if [ ${DRY} -eq 1 ]; then pgrep -f "^${CMD_SSH}.*${LOCAL_PFWD_LAST}$"; else pkill -f "^${CMD_SSH}.*${LOCAL_PFWD_LAST}$" > /dev/null; fi;
-  fi
+if [ "${LOCAL_OPEN}" = "true" ]; then
+  # Use Reverse SSH Tunneling
+	REMOTE_PFWD="-R ${REMOTE_LPORT:-65100}:127.0.0.1:${LOCAL_PORT:-22}";
+	LOCAL_HOST="127.0.0.1";
+	echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] Reverse Loopback Connection will be used"
+else
+  # Use Direct Connection
+	REMOTE_PFWD="";
+	REMOTE_LPORT="${LOCAL_PORT:-22}";
+	if [ ${LOCAL_HOST:-127.0.0.1} = "~" ]; then
+	  LOCAL_HOST="$(curl ipinfo.io/ip 2> /dev/null)";
+	fi;
+fi
+
+echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO][>>>] Establishing Remote Master Control..."
+#if [ ${DRY} -eq 1 ]; then echo "${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER:-root} -p ${REMOTE_PORT:-22} -i ${KEY} -M ${COMMON_OPT} ${REMOTE_LOCALPFWD} ${LOCAL_PORTPUB} ${REMOTE_PFWD} <<"; fi
+
+CONNECTION_COMMAND="${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER:-root} -p ${REMOTE_PORT:-22} -i ${KEY} ${COMMON_OPT} \
+-o ControlMaster=auto -o ControlPath=${LOCAL_CONTROLMASTER_INTERFACE:-.LANTIS}_${CONNECTION_NAME}"
+if [ ${1} = 1 ]; then
+  pkill -f "^bash ./.port-mapper.lantis.bash \"${1}\"$"
+  bash ./.port-mapper.lantis.bash "${1}" >> "${LOG_FILE}" &
+  ${CONNECTION_COMMAND} ${LOCAL_PORTPUB} ${REMOTE_PFWD} << "EOL"
+  if [ ! -f "${KEY_NAME:-lantis}.key" ]; then echo \"MISSING KEY\" && exit 1; fi
+  pkill -f "^${CMD_SSH}.*${REMOTE_LPORT}$" > /dev/null
+  echo "[${CONNECTION_NAME}][$(date ${DATE_FORMAT})][INFO][<<<] Linked!"
+  ${CONNECT_REMOTE_COMMANDS:-}
+  if [ "${DISABLE_LOCAL_LINK:-false}" == "false" ]; then
+  ${CMD_SSH} ${LOCAL_HOST:-127.0.0.1} -l ${LOCAL_USER:-root} -p ${REMOTE_LPORT} -i ${KEY_NAME:-lantis}.key ${COMMON_OPT} \
+    -o ControlMaster=auto \
+    -o ControlPath=${LOCAL_CONTROLMASTER_INTERFACE:-.LANTIS}_${CONNECTION_NAME} \
+    ${LOCAL_OPT}${REMOTE_PORTPUB} &;
+  fi;
+  echo "[${CONNECTION_NAME}][$(date ${DATE_FORMAT})][ERR!][<<<] ETOL";
+  ${DROPPED_REMOTE_COMMANDS:-}
+EOL
+else
+  pkill -f "^bash ./.port-mapper.lantis.bash \"${1}\"$"
+  ${CONNECTION_COMMAND} << "EOF"
+  pkill -f "^$${CMD_SSH} ${LOCAL_HOST:-127.0.0.1} -l ${LOCAL_USER:-root} -p ${REMOTE_LPORT} -i ${KEY_NAME:-lantis}.key.$" > /dev/null;
 EOF
+fi
+
 if [ ${DRY} -eq 1 ]; then exit 0; fi
 }
 # SET VARS #############################################################################################################
@@ -90,6 +111,8 @@ REMOTE_PORTPUB=""; LOCAL_PORTPUB=""; DRY=0; LOCAL_OPEN="false"; REMOTE_KILL="fal
 TIME_FAILED_CONN=2; TIME_FAILED_INET=5; TIMEOUT_VERIFY_INET=15; HOST_VERIFY="https://google.com"; DATE_FORMAT='+%d/%m/%Y %H:%M:%S'
 CMD_SSH="ssh"; CMD_SCP="scp"; KEY=lantis.key; SETUP_KEY="$HOME/.ssh/id_rsa"; LOCAL_OPT="-N -o ExitOnForwardFailure=yes"; FILENAME="";
 COMMON_OPT="-C -2 -o BatchMode=yes -o StrictHostKeyChecking=no -o TCPKeepAlive=yes -o ServerAliveInterval=5 -o ConnectTimeout=15 -o LogLevel=Error"
+LOCAL_CONTROLMASTER_INTERFACE=".LANTIS_INTERFACE"; REMOTE_CONTROLMASTER_INTERFACE=".LANTIS_INTERFACE";
+source ./.lantis.config
 source ./.watchdog.lantis.config
 # PARSE INPUT ##########################################################################################################
 while getopts "m:c:n:X:" opt; do
@@ -103,29 +126,18 @@ while getopts "m:c:n:X:" opt; do
   esac
 done
 # MAIN RUNTIME #########################################################################################################
+READ_FILE() {
+  # Option Selector
+  if [ "${FORWARD_PUBLIC}" = "true" ]; then REMOTE_PORTPUB=" -g"; fi
+  if [ "${REVERSE_PUBLIC}" = "true" ] && [ "${1}" = "1" ]; then LOCAL_PORTPUB=" -g"; fi
+
+  # Unique Generate Key Name
+  KEY_NAME="$(cat ${KEY}.pub | md5sum | awk '{print $1}')"
+  echo "Key Name: ${KEY_NAME:-lantis}"
+}
 source $FILENAME
-# Port List Converter
-if [ -n "${FORWARD_PORTS}" ]; then
-  for _PORT_SET in ${FORWARD_PORTS}; do
-    LOCAL_PFWD="${LOCAL_PFWD}-L ${_PORT_SET} ";
-    LOCAL_PFWD_LAST=${_PORT_SET};
-  done;
-fi
-if [ -n "${REVERSE_PORTS}" ] && [ "${2}" = "1" ]; then
-  for _PORT_SET in ${REVERSE_PORTS}; do
-    REMOTE_LOCALPFWD="${REMOTE_LOCALPFWD}-L ${_PORT_SET} ";
-  done;
-fi;
+READ_FILE ${2};
 
-# Option Selector
-if [ "${FORWARD_PUBLIC}" = "true" ]; then REMOTE_PORTPUB=" -g"; fi
-if [ "${REVERSE_PUBLIC}" = "true" ] && [ "${2}" = "1" ]; then LOCAL_PORTPUB=" -g"; fi
-
-# Unique Generate Key Name
-KEY_NAME="$(cat ${KEY}.pub | md5sum | awk '{print $1}')"
-echo "Key Name: ${KEY_NAME:-lantis}"
-
-echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO] DATA LOADED"
 while [ ${LOOPCON} -eq 1 ]; do
 	while [ -f ./.stat.inet ]; do sleep 2; done
 	if TEST_INET_VERIFY; then TEST_INET_PASSED
