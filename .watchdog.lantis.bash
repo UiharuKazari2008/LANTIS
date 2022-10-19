@@ -120,7 +120,7 @@ fi;
 
 # Option Selector
 if [ "${FORWARD_PUBLIC}" = "true" ]; then REMOTE_PORTPUB=" -g"; fi
-if [ "${REVERSE_PUBLIC}" = "true" ] && [ "${2}" = "1" ]; then LOCAL_PORTPUB=" -g"; fi
+if [ "${REVERSE_PUBLIC}" = "true" ] && [ "${OPER_MODE}" = "1" ]; then LOCAL_PORTPUB=" -g"; fi
 
 # Unique Generate Key Name
 KEY_NAME="$(cat ${KEY}.pub | md5sum | awk '{print $1}')"
