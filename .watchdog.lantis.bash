@@ -70,8 +70,7 @@ if [ ${DRY} -eq 1 ]; then echo "${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER:-root
 ${CMD_SSH} ${REMOTE_HOST} -l ${REMOTE_USER:-root} -p ${REMOTE_PORT:-22} -i ${KEY} ${COMMON_OPT} ${REMOTE_LOCALPFWD} ${LOCAL_PORTPUB} ${REMOTE_PFWD} << EOF
 	if [ ${1} = 1 ]; then
 	  if [ ! -f "${KEY_NAME:-lantis}.key" ]; then echo "MISSING KEY" && exit 1; fi
-		if [ "${REMOTE_KILL}" = "true" ]; then netstat -tlpn | grep ":${REMOTE_FWDPORT} " | sed -n 's@.* \([0-9]*\)/.*@kill \1@p' | sh > /dev/null; fi
-		echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO][<<<] Linked!"; pkill -f "^${CMD_SSH}.*${LOCAL_PFWD_LAST}$" > /dev/null
+		echo "[${CONNECTION_NAME}][$(date "${DATE_FORMAT}")][INFO][<<<] Linked!"; pkill -f "^${CMD_SSH}.*${REMOTE_LPORT}$" > /dev/null
     ${CONNECT_REMOTE_COMMANDS:-}
 		if [ ${DRY} -eq 1 ]; then echo "${LOCAL_USER:-root}@${LOCAL_HOST:-127.0.0.1}:${REMOTE_LPORT} -i ${KEY_NAME:-lantis}.key ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} ${LOCAL_PFWD}"; else
 		${CMD_SSH} ${LOCAL_HOST:-127.0.0.1} -l ${LOCAL_USER:-root} -p ${REMOTE_LPORT} -i ${KEY_NAME:-lantis}.key ${COMMON_OPT} ${LOCAL_OPT}${REMOTE_PORTPUB} ${LOCAL_PFWD}; fi
